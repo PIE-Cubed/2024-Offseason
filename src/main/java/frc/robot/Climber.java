@@ -20,13 +20,13 @@ public class Climber {
         // Motors
         //System.out.println("[INFO] >> Initializing climber motors...");
         
-        leftMotor = new CANSparkMax(LEFT_MOTOR_CAN, MotorType.kBrushless);
-        leftMotor.setSmartCurrentLimit(MOTOR_CURRENT_LIMIT);
-        leftMotor.setIdleMode(IdleMode.kBrake);
+        //leftMotor = new CANSparkMax(LEFT_MOTOR_CAN, MotorType.kBrushless);
+        //leftMotor.setSmartCurrentLimit(MOTOR_CURRENT_LIMIT);
+        //leftMotor.setIdleMode(IdleMode.kBrake);
 
-        rightMotor = new CANSparkMax(RIGHT_MOTOR_CAN, MotorType.kBrushless);
-        rightMotor.setSmartCurrentLimit(MOTOR_CURRENT_LIMIT);
-        rightMotor.setIdleMode(IdleMode.kBrake);
+        //rightMotor = new CANSparkMax(RIGHT_MOTOR_CAN, MotorType.kBrushless);
+        //rightMotor.setSmartCurrentLimit(MOTOR_CURRENT_LIMIT);
+        //rightMotor.setIdleMode(IdleMode.kBrake);
     }
 
     /**

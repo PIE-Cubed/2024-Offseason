@@ -248,7 +248,7 @@ public class Robot extends TimedRobot {
     shooterControl();
 
     // Allows for controlling the climber
-    climberControl();
+    //climberControl();
     
     // Allows for controlling the LEDs
     ledControl();
@@ -539,18 +539,6 @@ public class Robot extends TimedRobot {
           }
           else {
             arm.testElevate(0);
-          }
-
-          //Move the arm out/in incrementally
-          //System.out.println("Arm extension position: " + arm.getExtendPosition());
-          if(controls.extendArm()) {
-            arm.testExtend(0.35);
-          } 
-          else if(controls.retractArm()) {
-            arm.testExtend(-0.35);
-          } 
-          else {
-            arm.testExtend(0.0);
           }
 
           // next state

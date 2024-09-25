@@ -17,8 +17,8 @@ import com.revrobotics.CANSparkFlex;
 
  public class Shooter {
 
-    private final int SHOOTER_MOTOR_1_CAN = 21;
-    private final int SHOOTER_MOTOR_2_CAN = 22;
+    private final int SHOOTER_MOTOR_1_CAN = 5;
+    private final int SHOOTER_MOTOR_2_CAN = 6;
     private final int MOTOR_CURRENT_LIMIT = 40;
     private final double DUMP_SHOT_POWER  = 0.1;
     private final double SHOT_POWER  = .5;   // Competition speed: 1, Demo speed: 0.35

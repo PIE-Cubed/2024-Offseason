@@ -109,7 +109,8 @@ public class Auto {
 
             // Extend arm to 5in(current function takes encoder rotations right now)
             case 2:
-                status = arm.extendArm(1, 0.1);  // TODO get actual distance
+                //status = arm.extendArm(1, 0.1);  // TODO get actual distance
+                status = Robot.DONE;
                 break;
 
             // Finished routine, reset variables and return done
@@ -144,14 +145,15 @@ public class Auto {
             // Retract to make sure hard-stops are within bumpers
             case 1:
                 //System.out.println("Retract to rest");
-                status = arm.extendToRest();
+                //status = arm.extendToRest();
+                status = Robot.DONE;
                 break;
 
             // Rotate to rest while continually retracting
             case 2:
                 //System.out.println("Rotate to rest");
                 status = arm.rotateToRest(1.5);
-                arm.extendToRest(); // Keep retracting just in case it accidentally extends
+                //arm.extendToRest(); // Keep retracting just in case it accidentally extends
                 break;
             default:    // Finished routine, reset variables and return done
                 restStep = 1;
@@ -188,7 +190,8 @@ public class Auto {
 
             // Rotate to rest while continually retracting
             case 2:
-                status = arm.extendToIntake();
+                //status = arm.extendToIntake();
+                status = Robot.DONE;
                 break;
             default:    // Finished routine, reset variables and return done
                 intakeStep = 1;
@@ -225,14 +228,16 @@ public class Auto {
             case 1:
             //System.out.println("RETRACT");
             //System.out.println("Arm extension position: " + arm.getExtendPosition());
-                status = arm.extendArm(23, 0.25);
+                //status = arm.extendArm(23, 0.25);
+                status = Robot.DONE;
                 break;
 
             // Extend the arm so the wood holding block falls into the robot
             case 2:
             //System.out.println("EXTEND");
             //System.out.println("Arm extension position: " + arm.getExtendPosition());
-                status = arm.extendArm(-23, -0.25);
+                //status = arm.extendArm(-23, -0.25);
+                status = Robot.DONE;
                 break;
                 
             // Finished routine, reset variables, stop motors, and return done
@@ -277,7 +282,8 @@ public class Auto {
 
             // Retract the arm fully to prevent out of bounds issues
             case 2:
-                status = arm.extendArm(23, 0.25);
+                //status = arm.extendArm(23, 0.25);
+                status = Robot.DONE;
                 break;
             
             // Start the shooter motors and rotate the arm to -26 (333) degrees from 54
@@ -288,7 +294,8 @@ public class Auto {
 
             // Extend the arm to its original position
             case 4:
-                status = arm.extendArm(-16, -0.25);
+                //status = arm.extendArm(-16, -0.25);
+                status = Robot.DONE;
                 arm.maintainPosition(SHOOT1_ANGLE);
                 break;
                         
@@ -1215,22 +1222,6 @@ public class Auto {
         }
 
         return Robot.CONT;
-    }
-
-    public int extendArmWithTimer() {
-        int extendStatus = arm.extendToRest();
-        int stopStatusTimer = autoDelayMS(1500);
-
-        if (stopStatusTimer == Robot.DONE || extendStatus == Robot.DONE) {
-            arm.testExtend(0);
-
-            // Allows autoDelayMS to restart if it never finishes
-            delayFirstTime = true;
-            return Robot.DONE;
-        }
-        else{
-            return Robot.CONT;
-        }
     }
 
 

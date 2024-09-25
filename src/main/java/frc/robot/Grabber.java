@@ -13,7 +13,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 
 public class Grabber {
     private final int GRABBER_MOTOR1_CAN = 2;
-    private final int GRABBER_MOTOR2_CAN = 5;
+    private final int GRABBER_MOTOR2_CAN = 3;
     private final int INTAKE_BUTTONS_ID = 0;
 
     private final boolean GRABBER_MOTOR1_IS_INVERTED = false;
@@ -49,11 +49,11 @@ public class Grabber {
         //System.out.println("[INFO] >> Initializing grabber motor controllers...");
 
         // Instantiate grabber motors & sensors
-        grabberMotor1 = new CANSparkMax(GRABBER_MOTOR1_CAN, MotorType.kBrushed);
+        grabberMotor1 = new CANSparkMax(GRABBER_MOTOR1_CAN, MotorType.kBrushless);
         grabberMotor1.setInverted(GRABBER_MOTOR1_IS_INVERTED);
         grabberMotor1.setSmartCurrentLimit(INTAKE_CURRENT_LIMIT);
 
-        grabberMotor2 = new CANSparkMax(GRABBER_MOTOR2_CAN, MotorType.kBrushed);
+        grabberMotor2 = new CANSparkMax(GRABBER_MOTOR2_CAN, MotorType.kBrushless);
         grabberMotor2.setInverted(GRABBER_MOTOR2_IS_INVERTED);
         grabberMotor2.setSmartCurrentLimit(INTAKE_CURRENT_LIMIT);
 
