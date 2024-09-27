@@ -18,9 +18,9 @@ public class Grabber {
     private final int GRABBER_MOTOR3_CAN = 4;
     private final int INTAKE_BUTTONS_ID = 0;
 
-    private final boolean GRABBER_MOTOR1_IS_INVERTED = false;
-    private final boolean GRABBER_MOTOR2_IS_INVERTED = true;
-    private final boolean GRABBER_MOTOR3_IS_INVERTED = true;
+    private final boolean GRABBER_MOTOR1_IS_INVERTED = true;
+    private final boolean GRABBER_MOTOR2_IS_INVERTED = false;
+    private final boolean GRABBER_MOTOR3_IS_INVERTED = false;
 
     // TODO tune these power values
     public final int INTAKE_CURRENT_LIMIT = 40;
@@ -38,7 +38,6 @@ public class Grabber {
     private DigitalInput IntakeStopButtons;
     private static Grabber instancedGrabber;
     private DigitalInput irSensor;
-    private DigitalOutput irXmit;
 
 
     public static synchronized Grabber getInstance() {
@@ -78,11 +77,7 @@ public class Grabber {
         // Create the digital input for the intake buttons
        // IntakeStopButtons = new DigitalInput(INTAKE_BUTTONS_ID);
 
-        irSensor = new DigitalInput(0);
-        irXmit   = new DigitalOutput(1);
-        irXmit.disablePWM();
-        irXmit.set(true);
-
+        irSensor = new DigitalInput(3);
     } 
 
 
@@ -144,7 +139,8 @@ public class Grabber {
      * @return whether a note is found
      */
     public boolean noteDetected() {
-        return !IntakeStopButtons.get() || colorSensor.getProximity() > PROXIMITY_THRESHOLD;
+     //   return !IntakeStopButtons.get() || colorSensor.getProximity() > PROXIMITY_THRESHOLD;
+        return !irSensor.get();
     }
 
     /**
@@ -193,6 +189,6 @@ public class Grabber {
         boolean ringInView;
 
         ringInView = irSensor.get();
-        System.out.println("ring in view:" + ringInView);
+        System.out.println("ring in view:" + !ringInView);
     }
 }

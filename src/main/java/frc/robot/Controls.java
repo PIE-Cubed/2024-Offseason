@@ -251,7 +251,7 @@ public class Controls {
 
 	/***
 	 * Holding the A button will run the intake motors
-	 * @return Manipulator controller A button held down
+	 * @return Manipulator controller Y button held down
 	 */
 	public boolean overrideIntake() {
 		return manipulatorController.getYButton();
