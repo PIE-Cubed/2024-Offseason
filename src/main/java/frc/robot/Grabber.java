@@ -14,10 +14,12 @@ import com.revrobotics.CANSparkBase.IdleMode;
 public class Grabber {
     private final int GRABBER_MOTOR1_CAN = 2;
     private final int GRABBER_MOTOR2_CAN = 3;
+    private final int GRABBER_MOTOR3_CAN = 4;
     private final int INTAKE_BUTTONS_ID = 0;
 
     private final boolean GRABBER_MOTOR1_IS_INVERTED = false;
     private final boolean GRABBER_MOTOR2_IS_INVERTED = true;
+    private final boolean GRABBER_MOTOR3_IS_INVERTED = true;
 
     // TODO tune these power values
     public final int INTAKE_CURRENT_LIMIT = 40;
@@ -30,6 +32,7 @@ public class Grabber {
     
     private CANSparkMax grabberMotor1;
     private CANSparkMax grabberMotor2;
+    private CANSparkMax grabberMotor3;
     private ColorSensorV3 colorSensor;
     private DigitalInput IntakeStopButtons;
     private static Grabber instancedGrabber;
@@ -57,10 +60,15 @@ public class Grabber {
         grabberMotor2.setInverted(GRABBER_MOTOR2_IS_INVERTED);
         grabberMotor2.setSmartCurrentLimit(INTAKE_CURRENT_LIMIT);
 
+        grabberMotor3 = new CANSparkMax(GRABBER_MOTOR3_CAN, MotorType.kBrushed);
+        grabberMotor3.setInverted(GRABBER_MOTOR3_IS_INVERTED);
+        grabberMotor3.setSmartCurrentLimit(INTAKE_CURRENT_LIMIT);
+
         // Set the grabber motor idle modes to break, as it helps stop the note from moving forward
         grabberMotor1.setIdleMode(IdleMode.kBrake);
         grabberMotor2.setIdleMode(IdleMode.kBrake);
-        
+        grabberMotor3.setIdleMode(IdleMode.kBrake);
+
         //System.out.println("[INFO] >> Initializing grabber sensors...");
         colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
 
@@ -78,6 +86,7 @@ public class Grabber {
     public void setMotorPower(double power) {
         grabberMotor1.set(MathUtil.clamp(-1 * power, -1, 1));
         grabberMotor2.set(MathUtil.clamp(power, -1, 1));
+        grabberMotor3.set(MathUtil.clamp(power, -1, 1));
     }
 
     /**
