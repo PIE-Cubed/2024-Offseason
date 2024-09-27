@@ -288,6 +288,9 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
+
+    grabber.testIRsensor();
+
     // Read values from shuffleboard
     //double shooterPower = SmartDashboard.getNumber("Shooter Power", 0.0);
     //double grabberPower = SmartDashboard.getNumber("Grabber Power", 0.0);
@@ -356,7 +359,7 @@ public class Robot extends TimedRobot {
     // Test LEDs
     //ledControl();
 
-    System.out.println("Arm Angle: " + arm.getElevationPosition());
+   // System.out.println("Arm Angle: " + arm.getElevationPosition());
 
     //arm.extendToRest();
     //arm.rotateToRest(1.25);
@@ -401,7 +404,7 @@ public class Robot extends TimedRobot {
     //                   " | Rest Button State: " + arm.getRestButton()
     //);
 
-    System.out.println("Proximity: " + grabber.getProximity());
+   // System.out.println("Proximity: " + grabber.getProximity());
 
     // Get drive controller values
     //System.out.println("Forward speed: " + controls.getForwardSpeed() + " Strafe speed: " + controls.getStrafeSpeed() + " Rotate speed: " + controls.getRotateSpeed());

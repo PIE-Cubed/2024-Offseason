@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import com.revrobotics.ColorSensorV3;
 import com.revrobotics.CANSparkBase.IdleMode;
+import edu.wpi.first.wpilibj.DigitalOutput;
 
 public class Grabber {
     private final int GRABBER_MOTOR1_CAN = 2;
@@ -36,6 +37,9 @@ public class Grabber {
     private ColorSensorV3 colorSensor;
     private DigitalInput IntakeStopButtons;
     private static Grabber instancedGrabber;
+    private DigitalInput irSensor;
+    private DigitalOutput irXmit;
+
 
     public static synchronized Grabber getInstance() {
         //System.out.println("[INFO] >> Initializing instanced grabber...");
@@ -69,10 +73,15 @@ public class Grabber {
         grabberMotor2.setIdleMode(IdleMode.kBrake);
         grabberMotor3.setIdleMode(IdleMode.kBrake);
         //System.out.println("[INFO] >> Initializing grabber sensors...");
-        colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
+       // colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
 
         // Create the digital input for the intake buttons
-        IntakeStopButtons = new DigitalInput(INTAKE_BUTTONS_ID);
+       // IntakeStopButtons = new DigitalInput(INTAKE_BUTTONS_ID);
+
+        irSensor = new DigitalInput(0);
+        irXmit   = new DigitalOutput(1);
+        irXmit.disablePWM();
+        irXmit.set(true);
 
     } 
 
@@ -178,5 +187,12 @@ public class Grabber {
     
     public double getPower3() {
         return grabberMotor3.get();
+    }
+
+    public void testIRsensor()  {
+        boolean ringInView;
+
+        ringInView = irSensor.get();
+        System.out.println("ring in view:" + ringInView);
     }
 }
