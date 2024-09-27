@@ -68,7 +68,6 @@ public class Grabber {
         grabberMotor1.setIdleMode(IdleMode.kBrake);
         grabberMotor2.setIdleMode(IdleMode.kBrake);
         grabberMotor3.setIdleMode(IdleMode.kBrake);
-
         //System.out.println("[INFO] >> Initializing grabber sensors...");
         colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
 
@@ -176,5 +175,8 @@ public class Grabber {
     public double getPower2() {
         return grabberMotor2.get();
     }
-
+    
+    public double getPower3() {
+        return grabberMotor3.get();
+    }
 }
