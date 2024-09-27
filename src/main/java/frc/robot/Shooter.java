@@ -21,7 +21,7 @@ import com.revrobotics.CANSparkFlex;
     private final int SHOOTER_MOTOR_2_CAN = 6;
     private final int MOTOR_CURRENT_LIMIT = 40;
     private final double DUMP_SHOT_POWER  = 0.1;
-    private final double SHOT_POWER  = 1.0;   // Competition speed: 1, Demo speed: 0.35
+    private final double SHOT_POWER  = .55;   // Competition speed: 1, Demo speed: 0.35
     private CANSparkFlex shooterMotor1;
     private CANSparkFlex shooterMotor2;
     private Grabber instancedGrabber;
@@ -52,7 +52,7 @@ import com.revrobotics.CANSparkFlex;
      */
     public void startShooting(double shootPower) {
         shooterMotor1.set(MathUtil.clamp(shootPower, -1.0, 1.0));
-        shooterMotor2.set(MathUtil.clamp(shootPower, -1.0, 1.0));
+        shooterMotor2.set(MathUtil.clamp(shootPower * .8, -1.0, 1.0));
         //instancedGrabber.intakeOutake(true, false, false);
         instancedGrabber.setMotorPower(instancedGrabber.FEED_POWER);
     }
@@ -70,7 +70,7 @@ import com.revrobotics.CANSparkFlex;
      */
     public void spinup() {
         shooterMotor1.set(SHOT_POWER);
-        shooterMotor2.set(SHOT_POWER);
+        shooterMotor2.set(SHOT_POWER * .8);
     }
 
     /**

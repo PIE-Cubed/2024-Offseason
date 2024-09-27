@@ -34,7 +34,8 @@ public class Auto {
     private int armStatus = Robot.CONT;
     private int status = Robot.CONT;
     
-    private final double SHOOT1_ANGLE = 339;   // Up against speaker
+   // private final double SHOOT1_ANGLE = 339;   // Up against speaker
+    private final double SHOOT1_ANGLE = 326;   // Up against speaker
     //private final int SHOOT1_ANGLE = 349;   // Edge of safe zone
     private final double SHOOT2_ANGLE = 339;
     
