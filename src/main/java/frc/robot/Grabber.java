@@ -89,7 +89,7 @@ public class Grabber {
     public void setMotorPower(double power) {
         grabberMotor1.set(MathUtil.clamp(-1 * power, -1, 1));
         grabberMotor2.set(MathUtil.clamp(power, -1, 1));
-        grabberMotor3.set(MathUtil.clamp(power, -1, 1));
+        grabberMotor3.set(MathUtil.clamp(power * 1.5, -1, 1));  // 775 seems to need more power
     }
 
     /**
