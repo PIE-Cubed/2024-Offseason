@@ -121,6 +121,8 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("Amp Side Auto", "Amp Side Auto");
     m_chooser.addOption("Feed Side Auto", "Feed Side Auto");
     m_chooser.addOption("No Auto", "No Auto");
+    m_chooser.addOption("Speaker Center Just Shoot Auto", "Speaker Center Just Shoot Auto");
+    m_chooser.addOption("Speaker Center Get Distance Points Auto", "Speaker Center Get Distance Points Auto");
     SmartDashboard.putData("Auto Selector", m_chooser);
 
     // Reset the robot statuses. This ensures that we don't need to restart the code after every time we
@@ -196,6 +198,14 @@ public class Robot extends TimedRobot {
 
         case "Feed Side Auto":
           status = auto.speakerPositionFeed();
+          break;
+
+        case "Speaker Center Just Shoot Auto":
+          status = auto.speakerShootWithoutMoving();
+          break;
+
+        case "Speaker Center Get Distance Points Auto":
+          status = auto.speakerShootMoveOut();
           break;
 
         case "No Auto":

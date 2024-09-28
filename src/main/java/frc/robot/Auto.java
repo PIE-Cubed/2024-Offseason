@@ -897,7 +897,7 @@ public class Auto {
             // Start the shooter motors and rotate the arm to -26 (333) degrees from 54
             case 1:
                 shooter.spinup();
-                status = arm.rotateArm(SHOOT1_ANGLE);
+                status = autoDelayMS(1000);
                 break;
                         
             // Shoot the note by running the grabber
@@ -913,10 +913,62 @@ public class Auto {
                 arm.maintainPosition(SHOOT1_ANGLE);
                 break;
 
-            // Goto rest
+            // Finished routine, reset variables, stop motors, and return done
+            default:
+                shooter.stopShooting();
+                grabber.intakeOutake(false, false, false);
+                step = 1;
+                firstTime = true;
+                return Robot.DONE;
+        }
+
+        // Done current step, goto next one
+        if(status == Robot.DONE) {
+            step++;
+        }
+
+        return Robot.CONT;
+    }
+
+    public int speakerShootMoveOut() {
+        if(firstTime == true) {
+            firstTime = false;
+            step = 1;
+        }
+
+        switch(step) {            
+            // Start the shooter motors and rotate the arm to -26 (333) degrees from 54
+            case 1:
+                shooter.spinup();
+                status = autoDelayMS(1000);
+                break;
+                        
+            // Shoot the note by running the grabber
+            case 2:
+                grabber.setMotorPower(grabber.INTAKE_POWER);
+                arm.maintainPosition(SHOOT1_ANGLE);
+                status = Robot.DONE;
+                break;
+
+            // Assume the robot shot the note after 1 second(s)
+            case 3:
+                status = autoDelay(1);
+                arm.maintainPosition(SHOOT1_ANGLE);
+                break;
+
+            // Drive out 4 feet to get extra points
             case 4:
-                shooter.spindown();
-                status = restingPosition();
+                status = drive.driveDistanceWithAngle(0, 4, 0.5);
+                break;
+
+            // Wait a bit to be sure
+            case 5:
+                status = autoDelayMS(500);
+                break;
+
+            // Drive back 4 feet to get extra points
+            case 6:
+                status = drive.driveDistanceWithAngle(0, -4, 0.5);
                 break;
 
             // Finished routine, reset variables, stop motors, and return done
