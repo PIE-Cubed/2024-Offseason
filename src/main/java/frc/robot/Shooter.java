@@ -22,6 +22,8 @@ import com.revrobotics.CANSparkFlex;
     private final int MOTOR_CURRENT_LIMIT = 40;
     private final double DUMP_SHOT_POWER  = 0.1;
     private final double SHOT_POWER  = .55;   // Competition speed: 1, Demo speed: 0.35
+    private final double SHOT_POWER_AMP_TOP = 0.6;
+    private final double SHOT_POWER_AMP_BOTTOM = -0.08;
     private CANSparkFlex shooterMotor1;
     private CANSparkFlex shooterMotor2;
     private Grabber instancedGrabber;
@@ -71,6 +73,14 @@ import com.revrobotics.CANSparkFlex;
     public void spinup() {
         shooterMotor1.set(SHOT_POWER);
         shooterMotor2.set(SHOT_POWER * .8);
+    }
+
+    /**
+     * Spinup motor, to be ready at all times for amp shots
+     */
+    public void spinupAmp() {
+        shooterMotor1.set(SHOT_POWER_AMP_TOP);
+        shooterMotor2.set(SHOT_POWER_AMP_BOTTOM);
     }
 
     /**

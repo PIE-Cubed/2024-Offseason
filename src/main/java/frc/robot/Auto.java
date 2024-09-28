@@ -21,6 +21,7 @@ public class Auto {
     private boolean restFirstTime = true;
     private boolean intakeFirstTime = true;
     private boolean teleopShootFirstTime = true;
+    private boolean teleopShootAmpFirstTime = true;
     private boolean autoShootFirstTime = true;
     public boolean isRed = false;
     public int allianceAngleModifier = 1;
@@ -313,14 +314,14 @@ public class Auto {
                 arm.maintainPosition(SHOOT1_ANGLE);
                 break;
 
-            // Rotate the arm to it's resting position and turn off the shooter and Switch the grabber to intake mode
+            // Skip arm rest position
             case 7:
-                status = restingPosition();
+                status = Robot.DONE;
                 break;
 
-            // Extend the arm so the wood holding block falls into the robot, and so the arm is in the shooting position
+            // Skip arm intake position
             case 8:
-                status = intakePosition();
+                status = Robot.DONE;
                 break;
 
             // Drive backwards 4 feet
@@ -342,8 +343,9 @@ public class Auto {
             
                 break;
 
+            // Skip arm resting position
             case 10:
-                status = restingPosition();
+                status = Robot.DONE;
                 break;
 
             case 11:
@@ -994,6 +996,62 @@ public class Auto {
 
     /**
      * <p> Moves the arm so the shooter is aiming at the speaker
+     * @return Robot status, CONT or DONE
+     */
+    public int teleopShootAmp(boolean shooterEnable) {
+        //int intakeStatus = Robot.CONT;
+        //int driveStatus = Robot.CONT;
+        int status = Robot.CONT;
+
+        if(teleopShootAmpFirstTime == true) {
+            teleopShootAmpFirstTime = false;
+            step = 1;
+        }
+
+        switch(step) {            
+            // Start the shooter motors and rotate the arm to -23 (336) degrees from 54
+            case 1:
+                shooter.spinupAmp();
+                status = arm.rotateArm(SHOOT1_ANGLE);
+                break;
+
+            case 2:
+                status = autoDelayMS(1250);
+                arm.maintainPosition(SHOOT1_ANGLE);
+                break;
+            
+            // Start the grabber and keep the arm in shooting position
+            case 3:
+                grabber.setMotorPower(grabber.INTAKE_POWER);
+                arm.maintainPosition(SHOOT1_ANGLE);
+                
+                if(shooterEnable) {
+                    status = Robot.CONT;
+                }
+                else {
+                    status = Robot.DONE;
+                }
+                break;
+            
+            default:
+                shooter.spindown();
+                teleopShootAmpFirstTime = true;
+                grabber.intakeOutake(false, false, false);
+                arm.disableRotation();
+                step = 1;
+                return Robot.DONE;
+        }
+
+        // Done current step, goto next one
+        if(status == Robot.DONE) {
+            step++;
+        }
+
+        return Robot.CONT;
+    }
+
+    /**
+     * <p> Moves the arm so the shooter is aiming at the speaker
      * <p> -27 degrees from horizontal
      * <p> Fully retracts arm
      * <p> First rotates, then retracts the arm
@@ -1125,11 +1183,8 @@ public class Auto {
 
     /**
      * Moves the arm into the position to shoot into the amp
-     * TODO get arm angle and extension measurments from austin
      */
     public int ampPosition() {
-        System.err.println("Not implemented yet!");
-
         int status = Robot.CONT;
 
         if(firstTime == true) {
@@ -1139,10 +1194,25 @@ public class Auto {
 
         switch(step) {
             case 1:     // Rotate arm to position(need to get this angle)
+                status = arm.rotateArm(135);
                 break;
             case 2:     // Fully retract arm(need to confirm with austin)
+                status = autoDelay(1);
+                arm.maintainPosition(145);
+                break;
+            case 3:
+                arm.maintainPosition(145);
+                grabber.setMotorPower(grabber.OUTTAKE_POWER);
+                status = autoDelayMS(500);
+                break;
+            case 4:
+                status = arm.rotateArm(90);
+                break;
+            case 5:
+                status = arm.rotateArm(SHOOT1_ANGLE);
                 break;
             default:    // Finished routine, reset variables and return done
+                grabber.setMotorPower(0);
                 step = 1;
                 firstTime = true;
                 return Robot.DONE;

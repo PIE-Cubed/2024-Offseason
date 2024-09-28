@@ -288,9 +288,6 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
-
-    grabber.testIRsensor();
-
     // Read values from shuffleboard
     //double shooterPower = SmartDashboard.getNumber("Shooter Power", 0.0);
     //double grabberPower = SmartDashboard.getNumber("Grabber Power", 0.0);
@@ -408,6 +405,9 @@ public class Robot extends TimedRobot {
 
     // Get drive controller values
     //System.out.println("Forward speed: " + controls.getForwardSpeed() + " Strafe speed: " + controls.getStrafeSpeed() + " Rotate speed: " + controls.getRotateSpeed());
+  
+    auto.ampPosition();
+  
   }
 
   boolean on = false;
@@ -529,8 +529,9 @@ public class Robot extends TimedRobot {
   /**
 	 * Controls the arm in TeleOp
 	 */
-  private void armControl()
-  {
+  private void armControl() {
+      boolean enableShoot = controls.moveToAmpPosition();
+  
       if (armState == ArmState.TELEOP)
       {
           // Move the arm up/down incrementally
@@ -579,13 +580,13 @@ public class Robot extends TimedRobot {
       }
       else if (armState == ArmState.AMP)
       {
-          armStatus = arm.rotateArm(arm.ARM_AMP_POSITION_DEGREES);
-          
-          if (controls.moveToAmpPosition() && armStatus == Robot.DONE) {
-              arm.maintainPosition(arm.ARM_AMP_POSITION_DEGREES);
+          //armStatus = auto.teleopShootAmp(enableShoot);
+          armStatus = auto.ampPosition();
+          if (armStatus == Robot.DONE) {
+              armState = ArmState.TELEOP;
           } 
           else {
-              armState = ArmState.TELEOP;
+              armState = ArmState.AMP;
           }
       }
       else if (armState == ArmState.REST)
@@ -690,9 +691,13 @@ public class Robot extends TimedRobot {
 	 * Controls the grabber in TeleOp
 	 */
 	private void grabberControl() {
+    boolean ampShoot = controls.moveToAmpPosition();
+
     // Start the grabber in ground mode 
     if ((shooterState     == false) && 
         (autoShooterState == false) &&
+        (ampShoot         == false) &&
+        (armState         != ArmState.AMP) &&
         controls.overrideIntake() == false)  {
         grabber.intakeOutake(controls.runIntake(), controls.ejectNote(), false);  
     }

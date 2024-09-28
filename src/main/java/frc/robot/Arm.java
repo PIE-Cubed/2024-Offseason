@@ -107,7 +107,6 @@ public class Arm {
 
             if (rotateTargetCount >= 5) {
                 elevationFirstTime = true;
-                //elevationMotor.set(0.1);
                 return Robot.DONE;
             }
         }
