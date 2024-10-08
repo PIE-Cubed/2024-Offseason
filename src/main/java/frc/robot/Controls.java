@@ -38,7 +38,7 @@ public class Controls {
 	private final int MANIPULATOR_ID = 1;
 
 	// Controller object declaration
-	private XboxController driveController;
+	private ZorroController driveController;
 	private XboxController manipulatorController;
 
 	private boolean fieldDrive = true;
@@ -55,7 +55,8 @@ public class Controls {
         //System.out.println("[INFO] >> Initializing controllers...");
 
 		// Instance Creation
-		driveController = new XboxController(DRIVE_ID);
+		//driveController = new XboxController(DRIVE_ID);
+		driveController = new ZorroController(DRIVE_ID);
 		manipulatorController = new XboxController(MANIPULATOR_ID);
 
 		fieldDrive = false;
@@ -147,28 +148,31 @@ public class Controls {
 	}
 	
 	/**
-	 * Pressing left joystick will zero yaw in case of emergency
+	 * Pressing A button will zero yaw in case of emergency
 	 * 
 	 * @return zeroYaw
 	 */
 	public boolean zeroYaw() {
-		return driveController.getLeftStickButtonPressed();
+		//return driveController.getLeftStickButtonPressed();
+		return driveController.getAButtonPressed();
 	}
 	
 	/**
-	 * Holding right trigger will enable precision control
+	 * F Switch will enable precision control
 	 * 
 	 * @return precisionControl
 	 */
 	public boolean enablePrecisionDrive() {
-		return driveController.getRightTriggerAxis() > 0.05;
+		//return driveController.getRightTriggerAxis() > 0.05;
+		return driveController.getFButtonPressed();
 	}
 
 	public boolean enableFieldDrive() {
 		/*if(driveController.getLeftTriggerAxis() > 0.05) {
 			fieldDrive = !fieldDrive;
 		}*/
-		return driveController.getLeftTriggerAxis() < 0.05;
+		//return driveController.getLeftTriggerAxis() < 0.05;
+		return driveController.getEButtonPressed();
 	}
 
 	// Targeting
@@ -178,17 +182,18 @@ public class Controls {
 	 * @return Drive controller A button pressed
 	 */
 	public boolean toggleSpeakerTargeting() {
-		return driveController.getAButton();
+		return driveController.getCButtonUp();
+
 	}
 
 	// Stage Functions
 
 	/***
-	 * Pressing the X button will align the robot with the april tag while still allowing the driver to drive (crab drive)
-	 * @return Drive controller X button pressed
+	 * Pressing the D button will align the robot with the april tag while still allowing the driver to drive (crab drive)
+	 * @return Drive controller D button pressed
 	 */
 	public boolean alignWithAprilTagAndDrive() {
-		return driveController.getXButton();
+		return driveController.getCButtonDown();
 	}
 
 	/***
@@ -207,7 +212,7 @@ public class Controls {
 	 * @return Drive controller DPAD UP button pressed
 	 */
 	public boolean resetGyro() {
-		return driveController.getPOV() == 0;
+		return driveController.getDButtonPressed();
 	}
 
 	/***
@@ -219,19 +224,21 @@ public class Controls {
 	}*/
 
 	/***
-	 * Pressing the Left Bumper button will amplify signal lights
-	 * @return Drive controller Left Bumper button pressed
+	 * Pressing the G button will amplify signal lights
+	 * @return Drive controller G button pressed
 	 */
 	public boolean runLeftClimber() {
-		return driveController.getLeftBumper();
+		//return driveController.getLeftBumper();
+		return driveController.getGButton();
 	}
 
 	/***
-	 * Pressing the Right Bumper button will toggle source lights
-	 * @return Drive controller Right Bumper button pressed
+	 * Pressing the H button will toggle source lights
+	 * @return Drive controller H button pressed
 	 */
 	public boolean runRightClimber() {
-		return driveController.getRightBumper();
+		//return driveController.getRightBumper();
+		return driveController.getHButton();
 	}
 
 
@@ -369,7 +376,7 @@ public class Controls {
 
 	public boolean toggleLimelightLED() {
 		//return manipulatorController.getBackButtonPressed();
-		return driveController.getYButtonPressed();
+		return driveController.getBButtonDown();
 	}
 
 
@@ -385,7 +392,7 @@ public class Controls {
 	 * @return startButtonPressed
 	 */
 	public boolean autoKill() {
-		return driveController.getStartButtonPressed();
+		return false;
 	}
 
 	/**
@@ -394,7 +401,7 @@ public class Controls {
 	 * @return Drive controller B button held down
 	 */
 	public boolean enablePartyMode() {
-		return driveController.getBButton();
+		return driveController.getBButtonUp();
 	}
 
 }
