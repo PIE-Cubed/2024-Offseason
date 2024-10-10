@@ -36,7 +36,7 @@ public class Auto {
     private int status = Robot.CONT;
     
    // private final double SHOOT1_ANGLE = 339;   // Up against speaker
-    private final double SHOOT1_ANGLE = 326;   // Up against speaker
+    private final double SHOOT1_ANGLE = 327;   // Up against speaker
     //private final int SHOOT1_ANGLE = 349;   // Edge of safe zone
     private final double SHOOT2_ANGLE = 339;
     
@@ -418,14 +418,8 @@ public class Auto {
                 arm.maintainPosition(SHOOT1_ANGLE);
                 break;
 
-            // Rotate the arm to it's resting position and turn off the shooter and Switch the grabber to intake mode
-            case 6:
-                shooter.spindown();
-                status = Robot.DONE;
-                break;
-
             // Drive backwards 4 1/2 feet
-            case 7:
+            case 6:
                 //arm.maintainPosition(arm.ARM_REST_POSITION_DEGREES);
 
                 if (intakeStatus == Robot.CONT) {
@@ -448,9 +442,7 @@ public class Auto {
             
                 break;
 
-            case 8:
-                shooter.spinup();
-                
+            case 7:
                 apriltagShootAngle = apriltags.calculateArmAngleToShoot();
                 if(apriltagShootAngle == -1){
                     System.out.println("Can't see valid AprilTag");
@@ -460,13 +452,13 @@ public class Auto {
                 status = arm.rotateArm(apriltagShootAngle);
                 break;
 
-            case 9:
+            case 8:
                 arm.maintainPosition(apriltagShootAngle);
                 status = autoDelayMS(1000);
                 break;
             
             // Start the grabber and keep the arm in shooting position
-            case 10:
+            case 9:
                 grabber.setMotorPower(grabber.INTAKE_POWER);
                 arm.maintainPosition(apriltagShootAngle);
                 status = autoDelayMS(500);
@@ -1374,5 +1366,60 @@ public class Auto {
     *    TEST FUNCTIONS
     * 
     ******************************************************************************************/    
+    /**
+     * <p> Moves the arm so the shooter is aiming at the speaker
+     * <p> -27 degrees from horizontal
+     * <p> Fully retracts arm
+     * <p> First rotates, then retracts the arm
+     * @return Robot status, CONT or DONE
+     */
+    public int testShoot(double angle) {
+        //int intakeStatus = Robot.CONT;
+        //int driveStatus = Robot.CONT;
+        int status = Robot.CONT;
+
+        if(teleopShootFirstTime == true) {
+            teleopShootFirstTime = false;
+            step = 1;
+        }
+
+        switch(step) {            
+            // Start the shooter motors and rotate the arm to -23 (336) degrees from 54
+            case 1:
+                shooter.spinup();
+                status = arm.rotateArm(angle);
+                break;
+
+            case 2:
+                status = autoDelayMS(750);
+                arm.maintainPosition(angle);
+                break;
+            
+            // Start the grabber and keep the arm in shooting position
+            case 3:
+                grabber.setMotorPower(grabber.INTAKE_POWER);
+                arm.maintainPosition(angle);
+                
+                status = autoDelayMS(500);
+                break;
+            
+            default:
+                teleopShootFirstTime = true;
+                grabber.intakeOutake(false, false, false);
+                arm.disableRotation();
+                shooter.spindown();
+                step = 1;
+                return Robot.DONE;
+        }
+
+        // Done current step, goto next one
+        if(status == Robot.DONE) {
+            step++;
+        }
+
+        return Robot.CONT;
+    }
+
+
 }
 // End of the Auto class

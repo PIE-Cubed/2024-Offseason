@@ -46,6 +46,8 @@ public class AprilTags {
         if(distance == -1) {
             System.out.println("ERROR: Unable to get AprilTag");
             return -1;
+        } else {
+            System.out.println("Distance to AprilTag " + distance + "ft");
         }
         double angle = (-0.0139 * Math.pow(distance, 3)) + (0.1651 * Math.pow(distance, 2)) + (3.8277 * distance) + 315.39;
         
@@ -64,6 +66,12 @@ public class AprilTags {
             angle = 339;
         }
         //System.out.println(distance);
+
+        // TODO Fix the actual angle function as this is temporary
+        if(distance > 9.0 && distance < 9.4) {
+            System.out.println("Setting shooter angle to 340");
+            angle = 340;
+        }
 
         return angle;
     }
