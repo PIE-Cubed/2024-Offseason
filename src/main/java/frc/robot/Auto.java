@@ -47,7 +47,7 @@ public class Auto {
 
     // Object Creation
     private Drive          drive;
-    //private PoseEstimation position;
+    private Odometry       position;
     private CustomTables   nTables;
     private Arm            arm;
     private Grabber        grabber;
@@ -55,10 +55,10 @@ public class Auto {
     private AprilTags      apriltags;
 
     // Constructor
-    public Auto(Drive drive, PoseEstimation position, Arm arm, Grabber grabber, Shooter shooter, AprilTags apriltags) {
+    public Auto(Drive drive, Odometry position, Arm arm, Grabber grabber, Shooter shooter, AprilTags apriltags) {
         this.drive     = drive;
         this.grabber   = grabber;
-        //this.position = position;
+        this.position = position;
         this.arm       = arm;
         this.nTables   = CustomTables.getInstance();
         this.shooter   = shooter;
@@ -314,18 +314,8 @@ public class Auto {
                 arm.maintainPosition(SHOOT1_ANGLE);
                 break;
 
-            // Skip arm rest position
-            case 7:
-                status = Robot.DONE;
-                break;
-
-            // Skip arm intake position
-            case 8:
-                status = Robot.DONE;
-                break;
-
             // Drive backwards 4 feet
-            case 9:
+            case 7:
                 if (intakeStatus == Robot.CONT) {
                     intakeStatus = grabber.intakeOutake(true, false, true);
                 }
@@ -342,29 +332,20 @@ public class Auto {
                 }
             
                 break;
-
-            // Skip arm resting position
-            case 10:
-                status = Robot.DONE;
-                break;
-
-            case 11:
-                status = arm.rotateArm(SHOOT1_ANGLE);
-                break;
-
+            
             // Drive back to the speaker
-            case 12:
+            case 8:
                 arm.maintainPosition(SHOOT1_ANGLE);
                 status = drive.driveDistanceWithAngle(0, -5.3, 0.5);
                 break;
 
             // Rotate the arm so it's in the shooting position
-            case 13:
+            case 9:
                 status = arm.rotateArm(SHOOT2_ANGLE);    
                 break;
 
             // Shoot the note
-            case 14:
+            case 10:
                 grabber.setMotorPower(grabber.INTAKE_POWER);
                 arm.maintainPosition(SHOOT2_ANGLE);
                 status = autoDelay(1);
@@ -402,6 +383,9 @@ public class Auto {
             driveStatus = Robot.CONT;
             status = Robot.CONT;
             step = 1;
+
+            apriltags.setSpeakerPipeline(isRed);
+            System.out.println("Is red: " + isRed);
         }
 
         switch(step) {            
@@ -437,26 +421,17 @@ public class Auto {
             // Rotate the arm to it's resting position and turn off the shooter and Switch the grabber to intake mode
             case 6:
                 shooter.spindown();
-                //status = restingPosition();
-                break;
-
-            // Extend the arm so the wood holding block falls into the robot, and so the arm is in the shooting position
-            case 7:
-                status = intakePosition();
+                status = Robot.DONE;
                 break;
 
             // Drive backwards 4 1/2 feet
-            case 8:
+            case 7:
                 //arm.maintainPosition(arm.ARM_REST_POSITION_DEGREES);
 
                 if (intakeStatus == Robot.CONT) {
-                    /*if (grabber.noteDetected() == false) {
-                        intakeStatus = Robot.DONE;
-                    }*/
-
                     intakeStatus = grabber.intakeOutake(true, false, true);
                 }
-                else{
+                else {
                     grabber.setMotorPower(0);
                 }
                 
@@ -473,27 +448,25 @@ public class Auto {
             
                 break;
 
-            // Prepare to shoot
-            case 9:
-                //arm.maintainPosition(SHOOT1_ANGLE);
-                //status = drive.driveDistanceWithAngle(0, -5.3, 0.5);
+            case 8:
                 shooter.spinup();
-                status = restingPosition();
-                break;
-
-            case 10:
+                
                 apriltagShootAngle = apriltags.calculateArmAngleToShoot();
-                //System.out.println(apriltagShootAngle);
+                if(apriltagShootAngle == -1){
+                    System.out.println("Can't see valid AprilTag");
+                }
+                System.out.println("Shooting at " + apriltagShootAngle + "deg");
+                
                 status = arm.rotateArm(apriltagShootAngle);
                 break;
 
-            case 11:
+            case 9:
                 arm.maintainPosition(apriltagShootAngle);
                 status = autoDelayMS(1000);
                 break;
             
             // Start the grabber and keep the arm in shooting position
-            case 12:
+            case 10:
                 grabber.setMotorPower(grabber.INTAKE_POWER);
                 arm.maintainPosition(apriltagShootAngle);
                 status = autoDelayMS(500);
@@ -1234,7 +1207,7 @@ public class Auto {
     }
 
     /**
-     * Moves the arm into the position to shoot into the amp
+     * Moves the arm into the position and shoot into the amp
      */
     public int ampPosition() {
         int status = Robot.CONT;
@@ -1245,25 +1218,25 @@ public class Auto {
         }
 
         switch(step) {
-            case 1:     // Rotate arm to position(need to get this angle)
+            case 1:     // Rotate arm to 135deg
                 status = arm.rotateArm(135);
                 break;
-            case 2:     // Fully retract arm(need to confirm with austin)
+            case 2:     // Slowly go to 145deg
                 status = autoDelay(1);
                 arm.maintainPosition(145);
                 break;
-            case 3:
+            case 3:     // Outtake the note into the amp for 1/2second
                 arm.maintainPosition(145);
                 grabber.setMotorPower(grabber.OUTTAKE_POWER);
                 status = autoDelayMS(500);
                 break;
-            case 4:
-                status = arm.rotateArm(90);
+            case 4:     // Rotate to 85 so the arm won't go the other way on its way to rest
+                status = arm.rotateArm(85);
                 break;
-            case 5:
+            case 5:     // Go back to rest(shoot angle)
                 status = arm.rotateArm(SHOOT1_ANGLE);
                 break;
-            default:    // Finished routine, reset variables and return done
+            default:
                 grabber.setMotorPower(0);
                 step = 1;
                 firstTime = true;

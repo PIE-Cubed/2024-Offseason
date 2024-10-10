@@ -26,9 +26,9 @@ public class Robot extends TimedRobot {
 
 	// Object creation
   NetworkTableInstance FCSInfo;
-	PoseEstimation       position;
 	CustomTables         nTables;
   AprilTags            apriltags;
+	Odometry             position;
 	Controls             controls;
   Shooter              shooter;
   Grabber              grabber;
@@ -95,7 +95,7 @@ public class Robot extends TimedRobot {
     apriltags = new AprilTags(nTables.getIsRedAlliance());
 		drive     = new Drive(apriltags);
 		controls  = new Controls();
-		position  = new PoseEstimation(drive);
+		position  = new Odometry(drive);
     shooter   = new Shooter();
     climber   = new Climber();
     arm       = new Arm();

@@ -16,6 +16,11 @@ public class AprilTags {
     private final double SINGLE_CONST = 17.396;       // Old: 1.09 w cm
     private final double OFFSET = 277.39;              // Old: 228 w cm
 
+    private final int RED_SPEAKER_APRILTAG_PIPELINE = 0;
+    private final int BLUE_SPEAKER_APRILTAG_PIPELINE = 1;
+    private final int ALL_APRILTAGS_PIPELINE = 2;
+    private final int COLOR_PIPELINE = 3;
+
     public AprilTags(boolean isRed) {
         //System.out.println("[INFO] >> Configuring limelight...");
         // Turn off the limelight LEDs so they don't blind people
@@ -24,6 +29,8 @@ public class AprilTags {
         //aprilTagTable = NetworkTableInstance.getDefault().getTable("limelight");
         //System.out.println("[INFO] >> Getting alliance...");
         this.isRed = isRed;
+
+        
     }
 
     /**
@@ -36,6 +43,10 @@ public class AprilTags {
         //double distance = getDistanceToSpeakerFeet() * 30.48;
         //double angle = (CUBED_CONST * Math.pow(distance, 3)) - (SQUARED_CONST * Math.pow(distance, 2)) + (SINGLE_CONST * distance) + OFFSET;
         double distance = getDistanceToSpeakerFeet();
+        if(distance == -1) {
+            System.out.println("ERROR: Unable to get AprilTag");
+            return -1;
+        }
         double angle = (-0.0139 * Math.pow(distance, 3)) + (0.1651 * Math.pow(distance, 2)) + (3.8277 * distance) + 315.39;
         
         if(angle >= 360) {
@@ -99,6 +110,9 @@ public class AprilTags {
         return LimelightHelpers.getTX("limelight");
     }
 
+    /**
+     * Returns if there is a valid target(AprilTag or Color Target) in view
+     */
     public boolean validApriltagInView() {
         return LimelightHelpers.getTV("limelight");
     }
@@ -110,10 +124,10 @@ public class AprilTags {
      */
     public void setSpeakerPipeline() {
         if(isRed){
-            LimelightHelpers.setPipelineIndex("limelight", 0);  // AprilTag 4
+            LimelightHelpers.setPipelineIndex("limelight", RED_SPEAKER_APRILTAG_PIPELINE);  // AprilTag 4
         }
         else {
-            LimelightHelpers.setPipelineIndex("limelight", 1);  // AprilTag 7
+            LimelightHelpers.setPipelineIndex("limelight", BLUE_SPEAKER_APRILTAG_PIPELINE);  // AprilTag 7
         }
     }
 
@@ -131,6 +145,14 @@ public class AprilTags {
         else {
             LimelightHelpers.setPipelineIndex("limelight", 1);  // AprilTag 7
         }
+    }
+
+    /**
+     * <p> Sets the limelight pipeline with no filter
+     * <p> Uses pipeline 2
+     */
+    public void setAllPipeline() {
+        LimelightHelpers.setPipelineIndex("limelight", ALL_APRILTAGS_PIPELINE);
     }
 
     /**
@@ -168,10 +190,19 @@ public class AprilTags {
         SmartDashboard.putNumber("LimelightY", ty);
         SmartDashboard.putNumber("LimelightArea", ta);
     }
+
+    /**
+     * <p> Gets the currently targeted AprilTag's field ID
+     * @return Targeted AprilTag's field ID
+     */
     public int getAprilTagID() {
         return (int)LimelightHelpers.getFiducialID("limelight");
     }
 
+    /**
+     * <p> Sets the status of the LEDs
+     * @param on
+     */
     public void setLED(boolean on) {
         if(on) {
             LimelightHelpers.setLEDMode_ForceOn("limelight");
@@ -179,5 +210,15 @@ public class AprilTags {
         else {
             LimelightHelpers.setLEDMode_ForceOff("limelight");
         }
+    }
+
+    /**
+     * </p>Gets the target's color
+     * </p>Make sure to set the limelight to the color pipeline first!
+     */
+    public void printTargetColor() {
+        double hsvColor[] = LimelightHelpers.getTargetColor("limelight");
+
+        System.out.println("Hue: " + hsvColor[0] + " | Saturation: " + hsvColor[1] + " | Value: " + hsvColor[2]);
     }
 }

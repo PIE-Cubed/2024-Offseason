@@ -5,7 +5,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -13,8 +12,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -88,6 +85,11 @@ public class Drive {
     private final double ROTATE_ADJUST_TOLERANCE_RADIANS = 0.01745329;   // ~1 degree
     private final double ROTATE_TOLERANCE_DEGREES = 3;
     private final double APRILTAG_TOLERANCE_DEGREES = 3.5;
+
+    // driveDistanceWithAngleNew variables
+    private Pose2d initialPose;
+    private boolean doneRotate = false;
+    private int status = Robot.CONT;
 
     // Apriltags
     AprilTags apriltags;
@@ -310,7 +312,12 @@ public class Drive {
      * @param driveAngle -> The angle at which to drive forward at
      * @param distanceFeet -> The distance to drive in feet
      * @param power -> The power to apply to the motor(-1 - 1)
-     * @return
+     * 
+     * <p>//TODO Determine if this function should be removed as it isn't called anywhere
+     * <p>It only drives backward, similar to `driveDistanceWithAngle` and doesn't repeatedly
+     * <p>zero the encoders which is interesting because it was cited being unreliable previously
+     * <p>It doesn't do the power check nor negate the angle difference either
+     * <p>It also negates y and angular velocity in ChassisSpeeds which is confusing
      */
     public int driveReverseDistanceWithAngle(double driveAngle, double distanceFeet, double power) {
         // The difference between the current and target angle
@@ -503,11 +510,100 @@ public class Drive {
     }
 
     /**
+     * <p>Drives N feet forward, in a straight line, with Odometry and other improvements
+     * <p>No longer zeroes the drive encoders(If this is assumed from the regular `driveDistanceWithAngle`)
+     * @param driveAngleDegrees -> The angle at which to drive forward at, relative to the robot in degrees
+     * @param distanceFeet -> The distance to drive in feet
+     * @param power -> The power to apply to the motor, negative values drive backwards
+     * @param currentPose -> The current position of the robot
+     * 
+     * <p>//TODO Test this function
+     * <p>Test and see if this function can replace driveDistance by supplying the current yaw as `driveAngleDegrees`
+     * <p> Eventually I want to get this to a point where it automatically runs setup code:
+     * <p>  Rotates the robot to face `driveAngleDegrees`
+     * <p>  Rotates the wheels to 0(relative to the robot)
+     * <p> This should hopefully make calling this function a lot easier and more consise
+     * <p> But for now you should rotate the robot to face and the wheels to 0 (or 180 for negative powers)
+     */
+    public int driveDistanceWithAngleNew(double driveAngleDegrees, double distanceFeet, double power, Pose2d currentPose) {
+        // The difference between the current and target angle
+        double angleDifference = 0;
+
+        // If this function is being run for the first time, find the encoder 
+        // tick value (Current encoder tick + Number of ticks in the distance parameter)
+        if(driveDistanceFirstTime == true) {
+            driveDistanceFirstTime = false;
+            status = Robot.CONT;
+            doneRotate = false;
+
+            initialPose = currentPose;  // Get initial position(used to distance tracking)
+        }
+
+        // Should probaly move this to an auto routine
+        if(!doneRotate){
+            status = rotateRobot(driveAngleDegrees);
+
+            if(status == Robot.DONE) {
+                doneRotate = true;
+                status = Robot.CONT;
+            }
+            return Robot.CONT;
+        }
+        else if(doneRotate && status != Robot.DONE) {
+            // Rotate wheels to 0 if driving forward and 180 if backwards
+            status = rotateWheelsToAngle((power > 0) ? 0 : 180);
+            return Robot.CONT;
+        }
+        // Calculate the distance traveled(the current to initial position)
+        double distanceTraveled = Math.sqrt(
+            Math.pow(currentPose.getX() - initialPose.getX(), 2) + 
+            Math.pow(currentPose.getY() - initialPose.getY(), 2)
+        );
+
+        // Stop the robot if it has driven the correct distance
+        if(Math.abs(distanceTraveled) >= Math.abs(distanceFeet)) {
+            driveDistanceFirstTime = true;
+            stopWheels();
+
+            return Robot.DONE;
+        }
+
+        // Calculate the angle difference between the current angle and 0
+        angleDifference = rotationAdjustPidController.calculate(initialOrientation, currentPose.getRotation().getDegrees());
+        
+        /* Removed the check for a positive distance, it attempts to compensate for robot
+         *  angle drift by negating the PID calculation? The drive reverse function doesn't
+         *  do this either, so I'm even more confused why it's here 
+         * //TODO When testing, add this back in to see what it actually does
+         * */
+        //angleDifference *= -1;
+
+        /* X velocity equation: Power * Cosine of drive angle
+         * Y velocity equation: Power * Sine of drive angle
+         * Positive angle difference power rotates */
+        SwerveModuleState[] states = swerveDriveKinematics.toSwerveModuleStates(
+            new ChassisSpeeds(
+                power * Math.cos(Math.toRadians(driveAngleDegrees)),
+                power * Math.sin(Math.toRadians(driveAngleDegrees)),
+                angleDifference
+        ));
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_WHEEL_SPEED);   // Convert back to power
+        setModuleStates(states);
+
+        return Robot.CONT;
+    }
+
+    /**
      * Drives N feet
      * @param driveAngle -> The angle at which to drive forward at, relative to the robot
      * @param distanceFeet -> The distance to drive in feet
      * @param power -> The power to apply to the motor(-1 - 1)
-     * @return
+     * @returns Robot status
+     * 
+     * <p>//TODO Determine if this function should be removed as it isn't called anywhere
+     * <p>I don't necessarly understand how it works(specifically with swerve module state calculations)
+     * <p>It also only drives forward, similar to `driveDistanceWithAngle` and doesn't zero the wheels
+     * <p>which is interesting because it should improve reliability and speed so idk why it wasn't used
      */
     public int driveDistanceAngleDelta(double driveAngle, double distanceFeet, double power) {
         // The difference between the current and target angle
@@ -655,6 +751,91 @@ public class Drive {
         return Robot.CONT;
     }
 
+    /**
+     * <p> Automatically drives through a list of points
+     * <p> All modifications are untested and made with assumptions right now
+     * <p> Assumes currPose is updated every time its called
+     * @param listOfPoints The list of Pose2ds to drive to
+     * @param currPose The current position of the robot, see Odometry.getAprilTagsPose()
+     * @return
+     */
+    public int driveThroughPoints(Pose2d[] listOfPoints, Pose2d currPose) {
+        // Grabs the target point
+        Pose2d targetPoint = listOfPoints[autoPointIndex];
+
+        // This runs once for each point in the list
+        if(autoPointFirstTime == true) {
+            // Reset PID controller errors
+            autoDriveXController.reset();
+            autoDriveYController.reset();
+            autoDriveRotateController.reset();
+
+            // Setup PID controller setpoints
+            autoDriveXController.setSetpoint(targetPoint.getX());
+            autoDriveYController.setSetpoint(targetPoint.getY());
+            autoDriveRotateController.setSetpoint(targetPoint.getRotation().getRadians());
+
+            autoPointFirstTime = false;
+            autoPointAngled = false;
+
+            // Set tolerances, allow for a greater tolerance for all points except the last
+            if(autoPointIndex < listOfPoints.length - 1) {
+                autoDriveXController.setTolerance(2 * AUTO_DRIVE_TOLERANCE);
+                autoDriveYController.setTolerance(2 * AUTO_DRIVE_TOLERANCE);
+                autoDriveRotateController.setTolerance(2 * AUTO_DRIVE_ROTATE_TOLERANCE);
+            }
+            else {
+                autoDriveXController.setTolerance(AUTO_DRIVE_TOLERANCE);
+                autoDriveYController.setTolerance(AUTO_DRIVE_TOLERANCE);
+                autoDriveRotateController.setTolerance(AUTO_DRIVE_ROTATE_TOLERANCE);
+            }
+        }
+        else {
+            // Angles the wheels if they are not aligned before driving
+            // I'm assuming the original function uses this to rotate the 
+            //  wheels to face the target point, not the robot
+            // What's confusing is that it's only called on the first point,
+            //  I don't think it's really necessary if teleopDrive rotates automatically
+            //  TODO Test the necessity of this step
+            if(autoPointAngled == false) {
+                int rotateStatus = rotateWheelsToAngle(targetPoint.getRotation().getDegrees());
+                if(rotateStatus == Robot.DONE) {
+                    autoPointAngled = true;
+                }
+            }
+            else {
+                // Calculating targetVelocity based on distance to targetPoint
+                double targetXVelocity      = autoDriveXController.calculate(currPose.getX());
+                double targetYVelocity      = autoDriveYController.calculate(currPose.getY());
+                double targetRotateVelocity = autoDriveRotateController.calculate(getYawAdjusted());
+
+                // Limit velocities
+                targetXVelocity = xLimiter.calculate(targetXVelocity);
+                targetYVelocity = yLimiter.calculate(targetYVelocity);
+                targetRotateVelocity = rotateLimiter.calculate(targetRotateVelocity);
+
+                // Actual movement
+                teleopDrive(targetXVelocity, targetYVelocity, targetRotateVelocity, true);
+            }
+        }
+
+        // If X, Y, and Rotation are at target, moves on to next point
+        if(autoDriveXController.atSetpoint() && autoDriveYController.atSetpoint() && autoDriveRotateController.atSetpoint()) {
+            autoPointIndex++;
+            autoPointFirstTime = true;
+        }
+
+        // Function ends once we pass the last point
+        if(autoPointIndex > listOfPoints.length) {
+            autoPointIndex = 0;
+            autoPointFirstTime = true;
+            stopWheels();
+            return Robot.DONE;
+        }
+
+        return Robot.CONT;
+    }
+
     /*
      * Resets all instance variables used in driveToPoints
      */
@@ -761,7 +942,8 @@ public class Drive {
         return Robot.CONT;
     }
 
-    /**
+    /** //TODO Test this with colors! Try to target a note and rotate to face it
+     * <p> It *should work the same, you just have to set it to a color pipeline
      * <p> Sort of wrapper function which uses an AprilTag as a target angle
      * <p> If the pipeline is out of range, it returns Robot.FAIL
      * @return Robot status
@@ -813,8 +995,6 @@ public class Drive {
             // Get the horizontal offset of the AprilTag to the crosshair
             double targetOffset = apriltags.getHorizontalOffset();
             double rotateVelocity = -1 * aprilTagRotatePidController.calculate(targetOffset, 0);    // Drive to zero
-
-            //System.out.println("Offset: " + targetOffset + " | Power: " + rotateVelocity);
             
             // Get rotate velocity and rotate with teleopDrive()
             teleopDrive(forwardSpeed, strafeSpeed, MathUtil.clamp(rotateVelocity, -1.0, 1.0), false);
@@ -948,6 +1128,14 @@ public class Drive {
      */
     public double getYawDegreesAdjusted() {
         return -ahrs.getYaw();
+    }
+
+    /**
+     * Get yaw rate in degrees/second from NavX
+     * 
+     */
+    public double getYawDegreesRate() {
+        return ahrs.getRate();
     }
 
     /****************************************************************************************** 

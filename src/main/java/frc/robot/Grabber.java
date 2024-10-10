@@ -67,10 +67,12 @@ public class Grabber {
         grabberMotor3.setInverted(GRABBER_MOTOR3_IS_INVERTED);
         grabberMotor3.setSmartCurrentLimit(INTAKE_CURRENT_LIMIT);
 
-        // Set the grabber motor idle modes to break, as it helps stop the note from moving forward
-        grabberMotor1.setIdleMode(IdleMode.kBrake);
-        grabberMotor2.setIdleMode(IdleMode.kBrake);
+        // Set the chassis grabber motors to coast, so the note won't get caught
+        // Set the arm grabber motor to brake to make sure the not doesn't go too far
+        grabberMotor1.setIdleMode(IdleMode.kCoast);
+        grabberMotor2.setIdleMode(IdleMode.kCoast);
         grabberMotor3.setIdleMode(IdleMode.kBrake);
+        
         //System.out.println("[INFO] >> Initializing grabber sensors...");
        // colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
 
