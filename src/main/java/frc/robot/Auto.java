@@ -506,6 +506,7 @@ public class Auto {
         switch(step) {   
             // Rotate the drive motors to zero
             case 1:
+                shooter.spinup();
                 status = drive.rotateWheelsToAngle(0);
                 break;
                 
@@ -515,9 +516,7 @@ public class Auto {
                 status = Robot.DONE;
                 break;
             
-            // Start the shooter motors and rotate the arm to -26 (333) degrees from 54
             case 3:
-                shooter.spinup();
                 status = arm.rotateArm(SHOOT1_ANGLE);
                 break;
     
@@ -536,9 +535,8 @@ public class Auto {
 
             // Rotate the arm to its resting position, and turn off the shooter & grabber
             case 6:            
-                //shooter.stopShooting();
-                status = restingPosition();
                 grabber.intakeOutake(false, false, true);
+                status = Robot.DONE;
                             
                 break;
 
@@ -566,14 +564,12 @@ public class Auto {
                 
                 // Rotate the wheels back to zero before driving forward
             case 9:
-                armStatus = intakePosition();
                 driveStatus = drive.rotateWheelsToAngle(0);            
                 grabber.intakeOutake(true, false, true);
                 //armStatus = arm.extendToIntake();
 
-                if(driveStatus == Robot.DONE && armStatus == Robot.DONE) {
+                if(driveStatus == Robot.DONE) {
                     driveStatus = Robot.CONT;
-                    armStatus = Robot.CONT;
                     status = Robot.DONE;
                 } 
                 else {
@@ -602,70 +598,7 @@ public class Auto {
             
                 break;
 
-            // Reset Wheel angle to 0 and raise arm to 333 degrees to avoid note dragging
-            /*case 12:
-                if(armStatus == Robot.CONT) {
-                    armStatus = arm.rotateArm(333);
-                }
-            
-                if(driveStatus == Robot.CONT) {
-                    driveStatus = drive.rotateWheelsToAngle(0);
-                }
-                
-                if (armStatus == Robot.DONE && driveStatus == Robot.DONE) {
-                    driveStatus = Robot.CONT;
-                    armStatus = Robot.CONT;
-                    status = Robot.DONE;
-                }
-                else {
-                    status = Robot.CONT;
-                }
-            
-                break;
-          
-             Drive Backwards 4 feet
-            case 13:
-                arm.maintainPosition(333);
-                status = drive.driveDistanceWithAngle(0, -4.75, 0.5);
-                break;
-
-            // Rotate the robot back to 0
-            case 14:
-                arm.maintainPosition(333);
-                status = drive.rotateRobot(Math.toRadians(0));
-                break;
-
-            // Reset wheel angle to 0
-            case 14:
-                arm.maintainPosition(333);
-                status = drive.rotateWheelsToAngle(0);
-                break;
-
-            // Drive backwards 1 feet
-            case 15:
-                arm.maintainPosition(333);
-                status = drive.driveDistanceWithAngle(0, -1.5, 0.5);
-                break;
-            // Rotate robot to 28 to face speaker directly
-            case 11:
-                arm.maintainPosition(333);
-                status = drive.rotateRobot(Math.toRadians(28));
-                break;
-
-            case 12:
-                status = drive.rotateWheelsToAngle(0);
-                break;
-
-            // Drive back to speaker 5.5ft
-            case 13:
-                arm.maintainPosition(333);
-                status = drive.driveDistanceWithAngle(0, -5.5, 0.5);
-                break;
-
-            */
-
             // Align with the speaker to shoot
-            // Gets stuck here
             case 11:
                 status = drive.alignWithAprilTag();
                 break;
@@ -736,39 +669,26 @@ public class Auto {
         switch(step) {
             // Rotate the drive motors to zero
             case 1:
+            shooter.spinup();
                 status = drive.rotateWheelsToAngle(0);
-                break;
-
-            // Retract the arm fully to prevent out of bounds issues
-            case 2:
-                status = Robot.DONE;
                 break;
             
             // Start the shooter motors and rotate the arm to -26 (333) degrees from 54
-            case 3:
-                shooter.spinup();
+            case 2:
                 status = arm.rotateArm(SHOOT1_ANGLE);
                 break;
 
-            // Extend the arm to its original position
-            case 4:
+            // Assume the robot shot the note after 0.75 second(s)
+            case 3:
                 grabber.setMotorPower(grabber.INTAKE_POWER);
                 arm.maintainPosition(SHOOT1_ANGLE);
-                status = Robot.DONE;
-                break;
-                    
-            // Assume the robot shot the note after 0.75 second(s)
-            case 5:
                 status = autoDelayMS(750);
-                arm.maintainPosition(SHOOT1_ANGLE);
                 break;
 
-            // Rotate the arm to its resting position, and turn off the shooter & grabber
+            // Turn off grabber and drive
             case 6:            
-                shooter.stopShooting();
                 grabber.intakeOutake(false, false, true);
-                status = drive.driveDistanceWithAngle(0, 6, 0.5);            
-
+                status = drive.driveDistanceWithAngle(0, 6, 0.5);
                 break;
 
             // Rotate the robot 57 degrees

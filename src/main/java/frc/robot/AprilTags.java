@@ -71,6 +71,9 @@ public class AprilTags {
         if(distance > 9.0 && distance < 9.4) {
             System.out.println("Setting shooter angle to 340");
             angle = 340;
+        } else if(distance > 9.6 && distance < 10.4){
+            System.out.println("Setting shooter angle to 343");
+            angle = 343;
         }
 
         return angle;
