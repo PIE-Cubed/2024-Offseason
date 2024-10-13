@@ -52,7 +52,11 @@ public class ZorroController extends GenericHID {
         //kLeftDial(2),
         //kRightDial(3),
         kLeftX(3),
-        kLeftY(2);
+        kLeftY(2),
+        kE(4),
+        kF(5),
+        kB(7),
+        kC(6);
 
         public final int value;
 
@@ -74,17 +78,18 @@ public class ZorroController extends GenericHID {
 
     // Zorro buttons
     public enum Button {
-        kA(6),
-        kD(13),
+        kA(1),
+        kD(2),
         kG(7),
         kH(14),
         kEUp(5),
         kEDown(4),
+       // kFUp(12),
         kFUp(12),
         kFDown(13),
         kBUp(3),
-        kBMid(2),
-        kBDown(1),
+        kBMid(999),
+        kBDown(99),
         kCUp(10),
         kCMid(9),
         kCDown(8);
@@ -238,113 +243,123 @@ public class ZorroController extends GenericHID {
 
 
     // E Button
-    public boolean getEButton() {
-        return getRawButton(Button.kEUp.value);
+    // Up = 1, Down = -1
+    public boolean getETwoPosSwitch() {
+        if (getRawAxis(Axis.kE.value) == -1) {
+            return false;
+        }
+        return true;
     }
 
-    public boolean getEButtonPressed() {
-        return getRawButtonPressed(Button.kEUp.value);
+    // public boolean getEButtonPressed() {
+    //     return getRawButtonPressed(Button.kEUp.value);
+    // }
+
+    // public boolean getEButtonReleased() {
+    //     return getRawButtonReleased(Button.kEUp.value);
+    // }
+
+    // @SuppressWarnings("MethodName")
+    // public BooleanEvent e(EventLoop loop) {
+    //     return new BooleanEvent(loop, this::getEButton);
+    // }
+
+
+    // F Switch
+    // Up = true (1), Down = false (-1)
+    public boolean getFTwoPosSwitch() {
+        if (getRawAxis(Axis.kF.value) == -1) {
+            return false;
+        }
+        return true;
     }
 
-    public boolean getEButtonReleased() {
-        return getRawButtonReleased(Button.kEUp.value);
-    }
+    // public boolean getFButtonPressed() {
+    //     return getRawButtonPressed(Button.kFUp.value);
+    // }
 
-    @SuppressWarnings("MethodName")
-    public BooleanEvent e(EventLoop loop) {
-        return new BooleanEvent(loop, this::getEButton);
-    }
+    // public boolean getFButtonReleased() {
+    //     return getRawButtonReleased(Button.kFUp.value);
+    // }
 
-
-    // F Button
-    public boolean getFButton() {
-        return getRawButton(Button.kFUp.value);
-    }
-
-    public boolean getFButtonPressed() {
-        return getRawButtonPressed(Button.kFUp.value);
-    }
-
-    public boolean getFButtonReleased() {
-        return getRawButtonReleased(Button.kFUp.value);
-    }
-
-    @SuppressWarnings("MethodName")
-    public BooleanEvent f(EventLoop loop) {
-        return new BooleanEvent(loop, this::getFButton);
-    }
+    // @SuppressWarnings("MethodName")
+    // public BooleanEvent f(EventLoop loop) {
+    //     return new BooleanEvent(loop, this::getFButton);
+    // }
 
 
     // B Button Up
-    public boolean getBButtonUp() {
-        return getRawButton(Button.kBUp.value);
+    // Up = (1), Down = (-1), Center = (0)
+    public double getBThreePosSwitch() {
+        return getRawAxis(Axis.kB.value);
     }
 
-    public boolean getBButtonUpPressed() {
-        return getRawButtonPressed(Button.kBUp.value);
-    }
+    // public boolean getBButtonUpPressed() {
+    //     return getRawButtonPressed(Button.kBUp.value);
+    // }
 
-    public boolean getBButtonUpReleased() {
-        return getRawButtonReleased(Button.kBUp.value);
-    }
+    // public boolean getBButtonUpReleased() {
+    //     return getRawButtonReleased(Button.kBUp.value);
+    // }
 
-    @SuppressWarnings("MethodName")
-    public BooleanEvent bup(EventLoop loop) {
-        return new BooleanEvent(loop, this::getBButtonUp);
-    }
+    // @SuppressWarnings("MethodName")
+    // public BooleanEvent bup(EventLoop loop) {
+    //     return new BooleanEvent(loop, this::getBButtonUp);
+    // }
 
-    public boolean getBButtonDown () {
-        return getRawButton(Button.kBDown.value);
-    }
+    // public boolean getBButtonDown () {
+    //     return getRawButton(Button.kBDown.value);
+    // }
 
-    public boolean getBButtonDownPressed() {
-        return getRawButtonPressed(Button.kBDown.value);
-    }
+    // public boolean getBButtonDownPressed() {
+    //     return getRawButtonPressed(Button.kBDown.value);
+    // }
 
-    public boolean getBButtonDownReleased() {
-        return getRawButtonReleased(Button.kBDown.value);
-    }
+    // public boolean getBButtonDownReleased() {
+    //     return getRawButtonReleased(Button.kBDown.value);
+    // }
 
-    @SuppressWarnings("MethodName")
-    public BooleanEvent bdown(EventLoop loop) {
-        return new BooleanEvent(loop, this::getBButtonDown);
-    }
+    // @SuppressWarnings("MethodName")
+    // public BooleanEvent bdown(EventLoop loop) {
+    //     return new BooleanEvent(loop, this::getBButtonDown);
+    // }
 
 
     // C Button
-    public boolean getCButtonUp() {
-        return getRawButton(Button.kCUp.value);
+    // Up = (1), Down = (-1), Center = (0)
+    public double getCThreePosSwitch() {
+        return getRawAxis(Axis.kC.value);
     }
 
-    public boolean getCButtonUpPressed() {
-        return getRawButtonPressed(Button.kCUp.value);
-    }
+    // public boolean getCButtonUpPressed() {
+    //     return getRawButtonPressed(Button.kCUp.value);
+    // }
 
-    public boolean getCButtonUpReleased() {
-        return getRawButtonReleased(Button.kCUp.value);
-    }
+    // public boolean getCButtonUpReleased() {
+    //     return getRawButtonReleased(Button.kCUp.value);
+    // }
 
-    @SuppressWarnings("MethodName")
-    public BooleanEvent cup(EventLoop loop) {
-        return new BooleanEvent(loop, this::getCButtonUp);
-    }
+    // @SuppressWarnings("MethodName")
+    // public BooleanEvent cup(EventLoop loop) {
+    //     return new BooleanEvent(loop, this::getCButtonUp);
+    // }
 
-    public boolean getCButtonDown () {
-        return getRawButton(Button.kCDown.value);
-    }
+    // public boolean getCButtonDown () {
+    //     return getRawButton(Button.kCDown.value);
+    // }
 
-    public boolean getCButtonDownPressed() {
-        return getRawButtonPressed(Button.kCDown.value);
-    }
+    // public boolean getCButtonDownPressed() {
+    //     return getRawButtonPressed(Button.kCDown.value);
+    // }
 
-    public boolean getCButtonDownReleased() {
-        return getRawButtonReleased(Button.kCDown.value);
-    }
+    // public boolean getCButtonDownReleased() {
+    //     return getRawButtonReleased(Button.kCDown.value);
+    // }
 
-    @SuppressWarnings("MethodName")
-    public BooleanEvent cdown(EventLoop loop) {
-        return new BooleanEvent(loop, this::getCButtonDown);
-    }
+    // @SuppressWarnings("MethodName")
+    // public BooleanEvent cdown(EventLoop loop) {
+    //     return new BooleanEvent(loop, this::getCButtonDown);
+    // }
 
 
 }

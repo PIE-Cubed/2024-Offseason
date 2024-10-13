@@ -416,12 +416,31 @@ public class Robot extends TimedRobot {
     // Get drive controller values
     //System.out.println("Forward speed: " + controls.getForwardSpeed() + " Strafe speed: " + controls.getStrafeSpeed() + " Rotate speed: " + controls.getRotateSpeed());
 
-      System.out.println("Feet: " + apriltags.getDistanceToSpeakerFeet());
 
-      double angle = 343;   // 340 - 9.2ft
-      if(statusa != Robot.DONE) {
-          statusa = auto.testShoot(angle);
-      }
+
+
+
+
+
+
+
+
+
+      // System.out.println("Feet: " + apriltags.getDistanceToSpeakerFeet());
+
+      // double angle = 343;   // 340 - 9.2ft
+      // if(statusa != Robot.DONE) {
+      //     statusa = auto.testShoot(angle);
+      // }
+
+        System.out.println(controls.zeroYaw());
+
+
+
+
+
+
+
   }
   int statusa = Robot.CONT;
   boolean on = false;

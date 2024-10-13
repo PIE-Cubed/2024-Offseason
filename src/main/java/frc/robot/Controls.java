@@ -154,7 +154,7 @@ public class Controls {
 	 */
 	public boolean zeroYaw() {
 		//return driveController.getLeftStickButtonPressed();
-		return driveController.getAButtonPressed();
+		return driveController.getDButtonPressed();
 	}
 	
 	/**
@@ -164,7 +164,7 @@ public class Controls {
 	 */
 	public boolean enablePrecisionDrive() {
 		//return driveController.getRightTriggerAxis() > 0.05;
-		return driveController.getFButtonPressed();
+		return driveController.getFTwoPosSwitch();
 	}
 
 	public boolean enableFieldDrive() {
@@ -172,7 +172,7 @@ public class Controls {
 			fieldDrive = !fieldDrive;
 		}*/
 		//return driveController.getLeftTriggerAxis() < 0.05;
-		return driveController.getEButtonPressed();
+		return !driveController.getETwoPosSwitch();
 	}
 
 	// Targeting
@@ -182,8 +182,8 @@ public class Controls {
 	 * @return Drive controller A button pressed
 	 */
 	public boolean toggleSpeakerTargeting() {
-		return driveController.getCButtonUp();
-
+		//return driveController.getCButtonUp();
+		return false;
 	}
 
 	// Stage Functions
@@ -193,26 +193,15 @@ public class Controls {
 	 * @return Drive controller D button pressed
 	 */
 	public boolean alignWithAprilTagAndDrive() {
-		return driveController.getCButtonDown();
-	}
+		double value;
 
-	/***
-	 * Pressing the Y button will start auto climb
-	 * @return Drive controller Y button pressed
-	 */
-	public boolean autoClimb() {
-		return false;
-		//return driveController.getYButtonPressed();
-	}
-
-	//D-Pad
-
-	/***
-	 * Pressing the DPAD UP button will reset the gyro
-	 * @return Drive controller DPAD UP button pressed
-	 */
-	public boolean resetGyro() {
-		return driveController.getDButtonPressed();
+		value = driveController.getBThreePosSwitch();
+		// switch down(-1) - auto
+		if (value == -1) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/***
@@ -223,22 +212,27 @@ public class Controls {
 		return driveController.getPOV() == 180;
 	}*/
 
-	/***
-	 * Pressing the G button will amplify signal lights
-	 * @return Drive controller G button pressed
+	/**
+	 * <p> Checks if the B button is held down on the drive controller
+	 * <p> Sets the LEDs to party mode
+	 * @return Drive controller B button held down
 	 */
-	public boolean runLeftClimber() {
-		//return driveController.getLeftBumper();
-		return driveController.getGButton();
+	public boolean enablePartyMode() {
+		double value;
+
+		value = driveController.getCThreePosSwitch();
+		// switch down(-1 on controller axis) - party mode
+		if (value == -1) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
-	/***
-	 * Pressing the H button will toggle source lights
-	 * @return Drive controller H button pressed
-	 */
-	public boolean runRightClimber() {
-		//return driveController.getRightBumper();
-		return driveController.getHButton();
+	public boolean toggleLimelightLED() {
+		//return manipulatorController.getBackButtonPressed();
+		//return driveController.getBButtonDown();
+		return false;
 	}
 
 
@@ -374,11 +368,6 @@ public class Controls {
 		return manipulatorController.getRightY() > 0.3;
 	}
 
-	public boolean toggleLimelightLED() {
-		//return manipulatorController.getBackButtonPressed();
-		return driveController.getBButtonDown();
-	}
-
 
 
 	/****************************************************************************************** 
@@ -395,13 +384,14 @@ public class Controls {
 		return false;
 	}
 
-	/**
-	 * <p> Checks if the B button is held down on the drive controller
-	 * <p> Sets the LEDs to party mode
-	 * @return Drive controller B button held down
-	 */
-	public boolean enablePartyMode() {
-		return driveController.getBButtonUp();
+	public boolean autoClimb() {
+		return false;
+	}
+	public boolean runLeftClimber(){
+		return false;
+	}
+	public boolean runRightClimber(){
+		return false;
 	}
 
 }
