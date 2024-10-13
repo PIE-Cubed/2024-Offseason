@@ -1085,7 +1085,7 @@ public class Auto {
                 break;
             
             case 4:
-                step = restingPosition();
+                status = restingPosition();
                 break;
 
             default:
