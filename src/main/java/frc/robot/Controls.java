@@ -197,10 +197,10 @@ public class Controls {
 
 		value = driveController.getBThreePosSwitch();
 		// switch down(-1) - auto
-		if (value == -1) {
-			return false;
-		} else {
+		if (value == 1) {
 			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -222,10 +222,10 @@ public class Controls {
 
 		value = driveController.getCThreePosSwitch();
 		// switch down(-1 on controller axis) - party mode
-		if (value == -1) {
-			return false;
-		} else {
+		if (value == 1) {
 			return true;
+		} else {
+			return false;
 		}
 	}
 

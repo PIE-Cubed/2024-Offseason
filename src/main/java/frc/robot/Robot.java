@@ -433,7 +433,7 @@ public class Robot extends TimedRobot {
       //     statusa = auto.testShoot(angle);
       // }
 
-        System.out.println(controls.zeroYaw());
+        System.out.println(controls.alignWithAprilTagAndDrive());
 
 
 
