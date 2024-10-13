@@ -47,7 +47,7 @@ public class AprilTags {
             System.out.println("ERROR: Unable to get AprilTag");
             return -1;
         } else {
-            System.out.println("Distance to AprilTag " + distance + "ft");
+          //  System.out.println("Distance to AprilTag " + distance + "ft");
         }
         double angle = (-0.0139 * Math.pow(distance, 3)) + (0.1651 * Math.pow(distance, 2)) + (3.8277 * distance) + 315.39;
         
@@ -62,16 +62,17 @@ public class AprilTags {
         //    angle = Math.abs(angle);
         //}
         if(angle <= 330 && angle >= 5) {
-            System.out.println("Angle(" + angle + ") out of range (5-330deg)! Using 339");
+        //    System.out.println("Angle(" + angle + ") out of range (5-330deg)! Using 339");
             angle = 339;
         }
         //System.out.println(distance);
 
         // TODO Fix the actual angle function as this is temporary
         if(distance > 9.0 && distance < 9.4) {
-            System.out.println("Setting shooter angle to 340");
+        //    System.out.println("Setting shooter angle to 340");
             angle = 340;
         } else if(distance > 9.6 && distance < 10.4){
+        //
             System.out.println("Setting shooter angle to 343");
             angle = 343;
         }

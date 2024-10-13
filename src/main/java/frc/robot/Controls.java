@@ -83,7 +83,7 @@ public class Controls {
 	 */
 	public double getForwardSpeed() {
 		double speed;
-		double power = -1 * driveController.getLeftY();
+		double power = driveController.getLeftY();
 		
 		// Turns the power into a speed
 		if(enablePrecisionDrive()){
@@ -308,7 +308,7 @@ public class Controls {
 	 * @return Manipulator controller B button state
 	 */
 	public boolean moveToAmpPosition() {
-		return manipulatorController.getBButton();
+		return false;
 	}
 
 	/***
@@ -356,17 +356,21 @@ public class Controls {
 	 * Pressing RIGHT ANALOG DOWN will retract the arm
 	 * @return Manipulator controller RIGHT ANALOG DOWN pressed
 	 */
+	/*
 	public boolean retractArm() {
 		return manipulatorController.getRightY() < -0.3;
 	}
+	*/
 
 	/***
 	 * Pressing RIGHT ANALOG UP will extend the arm
 	 * @return Manipulator controller RIGHT ANALOG UP pressed
 	 */
+	/*
 	public boolean extendArm() {
 		return manipulatorController.getRightY() > 0.3;
 	}
+	*/
 
 
 
