@@ -41,8 +41,8 @@ public class Robot extends TimedRobot {
 	// Variables
 	private int status = CONT;
 	private boolean firstTime = true;
-  private boolean shooterState = false;
-  private boolean autoShooterState = false;
+  //private boolean shooterState = false;
+ // private boolean autoShooterState = false;
 
 	// Auto path
 	private SendableChooser<String> m_chooser = new SendableChooser<>();
@@ -75,6 +75,10 @@ public class Robot extends TimedRobot {
   /* TeleOp States */
   enum TeleopState { TELEOP, TARGET, CRAB_SHOOT };
   private TeleopState teleopState = TeleopState.TELEOP;
+
+  /* Shooter States */
+  enum ShooterState { OFF, AMP_SHOOT, AUTO_SHOOT, AUTO_AIM_ROTATE, AUTO_AIM_ROTATE_SHOOT };
+  private ShooterState shooterState = ShooterState.OFF;
 
 	/**
 	 * Constructor
@@ -646,6 +650,7 @@ public class Robot extends TimedRobot {
               armIntakeStatus = Robot.CONT;
           }
       }
+      // shoot up against AMP
       else if (armState == ArmState.SHOOT)
       {
           // Hand over control of the arm to shooterControl
@@ -678,10 +683,96 @@ public class Robot extends TimedRobot {
 	 * Controls the shooter in TeleOp
 	 */
 	private void shooterControl() {
-    boolean enableShooter = controls.enableShooter();          // Manipulator right trigger
-    boolean enableAutoShooter = controls.enableAutoShoot();    // Manipulator right bumper
-    //boolean crabShoot = controls.alignWithAprilTagAndDrive();  // Drive X button
+    boolean enableShooter     = controls.enableShooter();               // Shoot from against AMP
+    boolean enableAutoShooter = controls.enableAutoShoot();             // Shoot from multiple distances
+    boolean crabShoot         = controls.alignWithAprilTagAndDrive();   // Shoot from multiple distances with auto rotation on target
+    boolean startStopShooter  = controls.startShooterWheels();
+    int     status;
+    int     enableCount = 0;
 
+
+    // check for errors
+    if (enableShooter == true)  {
+       enableCount++;
+    }
+    if (enableAutoShooter == true)  {
+       enableCount++;
+    }
+    if (crabShoot == true)  {
+       enableCount++;
+    }
+    // special case where crab shoot mode and shooter is enabled
+    if ((crabShoot ==true) && (enableShooter == true) && (enableAutoShooter == false))  {
+       enableCount = 1;
+    }
+    if (enableCount > 1)  {
+       return;  // Too many shooters enabled
+    }
+
+    if (shooterState == ShooterState.OFF)  {
+      // Start or stop the shooter wheels, the start button flips the current state
+      if(startStopShooter == true) {
+        shooterSpinning = !shooterSpinning;
+        if(shooterSpinning) {
+          shooter.spinup();
+        }
+        else {
+          shooter.spindown();
+        }
+      }
+    }
+    // shoot against AMP.  Will complete when releasing button.
+    //  Shooter will spin down
+    else if (shooterState == ShooterState.AMP_SHOOT)  {
+       status = auto.teleopShoot(enableShooter);
+
+       if (status == Robot.DONE)  {
+         shooterState = ShooterState.OFF;
+       }
+       else  {
+         shooterState = ShooterState.AMP_SHOOT;
+       }
+    }
+    //  Shoot from any distance using april tags for arm rotation
+    else if (shooterState == ShooterState.AUTO_SHOOT)  {
+       status = auto.apriltagShoot(enableAutoShooter);
+       if (status == Robot.DONE)  {
+         shooterState = ShooterState.OFF;
+       }
+       else  {
+         shooterState = ShooterState.AUTO_SHOOT;
+       }
+
+    }
+    // Shoot from any distance using april tags for arm rotation and
+    //  april tags for rotation lock on target
+    //  Ring is shot when the manipulator pulls the trigger
+    else if (shooterState == ShooterState.AUTO_AIM_ROTATE)  {
+        // armControl will set arm angle
+        // driveControl will set robot orientation
+        // shoot when manipulator pulls trigger
+        if (crabShoot == false)  {
+            shooterState = ShooterState.OFF;
+        }
+        else if (enableShooter == true)  {
+            shooterState = ShooterState.AUTO_AIM_ROTATE_SHOOT;
+        }
+        else  {
+            shooterState = ShooterState.AUTO_AIM_ROTATE;
+        }
+    }
+    else if (shooterState == ShooterState.AUTO_AIM_ROTATE_SHOOT)  {
+        status = auto.teleopShootCrabDrive(enableShooter);
+
+        if (status == Robot.DONE)  {
+            shooterState = ShooterState.AUTO_AIM_ROTATE;
+        }
+        else  {
+            shooterState = ShooterState.AUTO_AIM_ROTATE_SHOOT;
+        }
+    }
+
+/*
     // Shoot a note
     if (enableShooter == true) {
       shooterState = true;
@@ -707,31 +798,24 @@ public class Robot extends TimedRobot {
       auto.resetAutoShoot();
       shooter.stopShooting();
     }
-
-    // Start or stop the shooter wheels, the start button flips the current state
-    if(controls.startShooterWheels()) {
-      shooterSpinning = !shooterSpinning;
-      if(shooterSpinning) {
-        shooter.spinup();
-      }
-      else {
-        shooter.spindown();
-      }
-    }
+*/
 	}
 
   /**
 	 * Controls the grabber in TeleOp
 	 */
 	private void grabberControl() {
-    boolean ampShoot = controls.moveToAmpPosition();
+    boolean ampShoot          = controls.moveToAmpPosition();
+    boolean enableShooter     = controls.enableShooter();
+    boolean enableAutoShooter = controls.enableAutoShoot();
+
 
     // Start the grabber in ground mode 
-    if ((shooterState     == false) && 
-        (autoShooterState == false) &&
-        (ampShoot         == false) &&
-        (armState         != ArmState.AMP) &&
-        controls.overrideIntake() == false)  {
+    if ((enableShooter             == false) && 
+        (enableAutoShooter         == false) &&
+        (ampShoot                  == false) &&
+        (armState                  != ArmState.AMP) &&
+        (controls.overrideIntake() == false))  {
         grabber.intakeOutake(controls.runIntake(), controls.ejectNote(), false);  
     }
 

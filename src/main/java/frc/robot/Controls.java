@@ -189,6 +189,8 @@ public class Controls {
 	// Stage Functions
 
 	/***
+	 * Uses April tags to align the robot with the target & adjust the arm angle for the target distance.
+	 * 		The driver will lose control of rotating the robot and adjusting the arm
 	 * Pressing the D button will align the robot with the april tag while still allowing the driver to drive (crab drive)
 	 * @return Drive controller D button pressed
 	 */
@@ -267,6 +269,8 @@ public class Controls {
 	}
 
 	/***
+	 * Shoots from multiple distances
+	 * 		Adjusts arm angle only.  Rotation not controlled.
 	 * Pressing the right bumper will shoot the note softly
 	 * @return Manipulator controller right bumper pressed
 	 */
@@ -276,6 +280,7 @@ public class Controls {
 	
 	// Shooting
 	/***
+	 * Shoots from against the AMP
 	 * Holding the right trigger will run the shooter motors
 	 * @return Manipulator controller right trigger held in
 	 */
@@ -286,7 +291,9 @@ public class Controls {
 	/*public boolean doDumpShots() {
 		return manipulatorController.getBackButtonPressed();
 	} */
+
 	/***
+	 * Starts the shooter motors only.  Ring not fed into shooter yet.
 	 * Pressing the Start button will start the shooting processs
 	 * @return Manipulator controller Start button pressed
 	 */

@@ -919,6 +919,7 @@ public class Auto {
                 teleopShootFirstTime = true;
                 grabber.intakeOutake(false, false, false);
                 arm.disableRotation();
+                shooter.spindown();
                 step = 1;
                 return Robot.DONE;
         }
@@ -1092,6 +1093,7 @@ public class Auto {
                 autoShootFirstTime = true;
                 grabber.intakeOutake(false, false, false);
                 arm.disableRotation();
+                shooter.spindown();
                 step = 1;
                 return Robot.DONE;
         }
