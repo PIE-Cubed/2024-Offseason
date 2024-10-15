@@ -635,6 +635,7 @@ public class Robot extends TimedRobot {
        enableCount = 1;
     }
     if (enableCount > 1)  {
+      System.err.println("Too many shooters enabled!");
        return;  // Too many shooters enabled
     }
 
@@ -649,6 +650,16 @@ public class Robot extends TimedRobot {
           shooter.spindown();
         }
       }
+
+      // Checks states
+      if(enableShooter) {
+        shooterState = ShooterState.SPEAKER_SHOOT;
+      }
+      // Crab shoot
+      else if(enableAutoShooter) {
+        shooterState = ShooterState.AUTO_SHOOT;
+      }
+
     }
     // shoot against the speaker.  Will complete when releasing button.
     //  Shooter will spin down
@@ -676,6 +687,7 @@ public class Robot extends TimedRobot {
     // Shoot from any distance using april tags for arm rotation and
     //  april tags for rotation lock on target
     //  Ring is shot when the manipulator pulls the trigger
+    // Basically is the base point for crab drive
     else if (shooterState == ShooterState.AUTO_AIM_ROTATE)  {
         // armControl will set arm angle
         // driveControl will set robot orientation
