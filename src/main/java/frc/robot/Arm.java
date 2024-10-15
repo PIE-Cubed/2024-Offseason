@@ -26,7 +26,7 @@ public class Arm {
     private final double ARM_ELEVATION_PID_P = 0.04;
     private final double ARM_ELEVATION_PID_I = ARM_ELEVATION_PID_P / 1.5;
         
-    public final double ARM_REST_POSITION_DEGREES = 329;
+    public final double ARM_REST_POSITION_DEGREES = 325;
     public final double ARM_AMP_POSITION_DEGREES = 25.65;
 
     private CANSparkMax elevationMotor;
@@ -40,9 +40,6 @@ public class Arm {
     private DigitalInput intake2StopButton;
     
     private int rotateTargetCount = 0;
-    
-    //public final double ARM_POT_REST_POSITION = 58;
-    //public final double ARM_POT_INTAKE_POSITION = 135;
 
     private boolean elevationFirstTime;
     private double elevationAngle;
@@ -85,7 +82,7 @@ public class Arm {
         }
 
         /* Negative power moves the arm upward;
-            The PID value will be positive to increase the angle */
+           The PID value will be positive to increase the angle */
         double power = -elevationMotorPidController.calculate(elevationEncoder.getPosition(), degrees);
         elevationMotor.set(MathUtil.clamp(power, -0.3, 0.3)); // Clamp
                 
