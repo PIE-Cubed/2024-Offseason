@@ -47,13 +47,7 @@ public class Arm {
     private boolean elevationFirstTime;
     private double elevationAngle;
 
-    private double startPosition;
-    private double targetDistance;
-
-    private double rotateStatus = Robot.CONT;
-
     public Arm() {        
-        //System.out.println("[INFO] >> Initializing arm motors...");
         
         // Setup elevation motor
         elevationMotor = new CANSparkMax(ELEVATION_MOTOR_CAN, MotorType.kBrushless);
@@ -66,8 +60,6 @@ public class Arm {
         elevationEncoder.setVelocityConversionFactor(ELEVATION_ENCODER_FACTOR);
 
         // PID controllers
-        //System.out.println("[INFO] >> Initializing arm PID controllers...");
-
         // Elevation PID
         elevationMotorPidController = new PIDController(ARM_ELEVATION_PID_P, ARM_ELEVATION_PID_I, 0.0);
         elevationMotorPidController.setIntegratorRange(-0.1, 0.1);
@@ -76,13 +68,10 @@ public class Arm {
 
         elevationFirstTime = true;
         elevationAngle = 0.0;
-
-        startPosition = elevationEncoder.getPosition();
-        //System.out.println("[INFO] >> Arm start position: " + startPosition);
     }
 
     /**
-     * <p>Rotates the arm with the given radian value
+     * <p>Rotates the arm with the given degree value
      * <p>0 degrees is horizontal
      * 
      * @param degrees The angle to rotate to in degrees
@@ -95,11 +84,9 @@ public class Arm {
             rotateTargetCount = 0;
         }
 
-        //System.out.println("From: " + elevationEncoder.getPosition() + " To: " + degrees);
         /* Negative power moves the arm upward;
             The PID value will be positive to increase the angle */
         double power = -elevationMotorPidController.calculate(elevationEncoder.getPosition(), degrees);
-        //SmartDashboard.putNumber("Arm power", power);
         elevationMotor.set(MathUtil.clamp(power, -0.3, 0.3)); // Clamp
                 
         if(elevationMotorPidController.atSetpoint()) {
@@ -117,6 +104,11 @@ public class Arm {
         return Robot.CONT;
     }
 
+    /**
+     * <p> Rotates the arm to `ARM_REST_POSITION_DEGREES`
+     * @param powerMultiplier Multiplies the PID power
+     * @return Robot status, CONT, DONE
+     */
     public int rotateToRest(double powerMultiplier) {
         if(elevationFirstTime) {
             elevationFirstTime = false;
@@ -129,7 +121,6 @@ public class Arm {
             The PID value will be positive to increase the angle */
         double power = -elevationMotorPidController.calculate(elevationEncoder.getPosition(), ARM_REST_POSITION_DEGREES);
         power *= powerMultiplier;
-        //SmartDashboard.putNumber("Arm power", power);
         elevationMotor.set(MathUtil.clamp(power, -0.3, 0.3)); // Clamp
                 
         if(elevationMotorPidController.atSetpoint()) {
@@ -137,11 +128,10 @@ public class Arm {
 
             if (rotateTargetCount >= 5) {
                 elevationFirstTime = true;
-                //elevationMotor.set(0.1);
                 return Robot.DONE;
             }
         }
-        else{
+        else {
             rotateTargetCount = 0;
         }
 

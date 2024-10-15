@@ -269,9 +269,10 @@ public class Controls {
 	}
 
 	/***
-	 * Shoots from multiple distances
-	 * 		Adjusts arm angle only.  Rotation not controlled.
-	 * Pressing the right bumper will shoot the note softly
+	 * <p> Shoots from multiple distances
+	 * <p>		Adjusts arm angle only.  Rotation not controlled.
+	 * <p> Pressing the right bumper will shoot the note softly
+	 * <p> For AprilTag functions
 	 * @return Manipulator controller right bumper pressed
 	 */
 	public boolean enableAutoShoot() {
@@ -280,7 +281,6 @@ public class Controls {
 	
 	// Shooting
 	/***
-	 * Shoots from against the AMP
 	 * Holding the right trigger will run the shooter motors
 	 * @return Manipulator controller right trigger held in
 	 */
@@ -310,13 +310,6 @@ public class Controls {
 	//}
 
 	// Positioning
-	/***
-	 * Holding the B button will move the arm to the AMP position
-	 * @return Manipulator controller B button state
-	 */
-	public boolean moveToAmpPosition() {
-		return false;
-	}
 
 	/***
 	 * Pressing the A button will move the arm to the resting/ground pickup position
@@ -394,16 +387,5 @@ public class Controls {
 	public boolean autoKill() {
 		return false;
 	}
-
-	public boolean autoClimb() {
-		return false;
-	}
-	public boolean runLeftClimber(){
-		return false;
-	}
-	public boolean runRightClimber(){
-		return false;
-	}
-
 }
 // End of the Controls class
