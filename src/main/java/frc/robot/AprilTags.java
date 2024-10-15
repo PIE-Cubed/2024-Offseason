@@ -40,6 +40,9 @@ public class AprilTags {
      *         <p> -1 if it fails to get the AprilTag
      */
     public double calculateArmAngleToShoot() {
+        double delta;
+
+
         //double distance = getDistanceToSpeakerFeet() * 30.48;
         //double angle = (CUBED_CONST * Math.pow(distance, 3)) - (SQUARED_CONST * Math.pow(distance, 2)) + (SINGLE_CONST * distance) + OFFSET;
         double distance = getDistanceToSpeakerFeet();
@@ -77,6 +80,48 @@ public class AprilTags {
             angle = 343;
         }
 
+        /* 5.46 feet @ 327 degrees */
+        if ((distance > 5.5)  &&  (distance < 6.0))  {
+            delta = distance - 5.5;
+            angle = delta * (330 -327);
+        }
+        /* 6 feet @ 330 degrees */
+        else if ((distance > 6.0)  &&  (distance < 7.0))  {
+            delta = distance - 6;
+            angle = delta * (333 - 330);
+        }
+        /* 7 feet @ 333 degrees */
+        else if ((distance > 7.0)  &&  (distance < 8.0))  {
+            delta = distance - 7;
+            angle = delta * (335 - 333);
+        }
+        /* 8 feet @ 335 degrees */
+        else if ((distance > 8.0)  &&  (distance < 9.0))  {
+            delta = distance - 8;
+            angle = delta * (339.5 - 335);
+        }
+        /* 9 feet @ 339.5 degrees */
+        else if ((distance > 9.0)  &&  (distance < 10.0))  {
+            delta = distance - 9;
+            angle = delta * (342.5 - 339.5);
+        }
+        /* 10 feet @ 342.5 degrees */
+        else if ((distance > 10.0)  &&  (distance < 11.0))  {
+            delta = distance - 10;
+            angle = delta * (345 - 342.5);
+        }
+        /* 11 feet @ 345 degrees */
+        else if ((distance > 11.0)  &&  (distance < 12.0))  {
+            delta = distance - 11;
+            angle = delta * (346 - 345);
+        }
+        /* 12 feet @ 346 degrees */
+        else if ((distance > 12.0)  &&  (distance < 13.0))  {
+            delta = distance - 12;
+            angle = delta * (348 - 346);
+        }
+        /* 13 feet @ 348 degrees */
+        
         return angle;
     }
 
