@@ -4,13 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.Angle;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Units;
-import frc.robot.Robot.ArmState;
-
 public class Auto {
     // State tracking variables - each variable can only be used in one function at any time
     // All top level routines use firstTime and step, all helper routines have their own variables

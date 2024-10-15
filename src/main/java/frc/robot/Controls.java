@@ -231,12 +231,6 @@ public class Controls {
 		}
 	}
 
-	public boolean toggleLimelightLED() {
-		//return manipulatorController.getBackButtonPressed();
-		//return driveController.getBButtonDown();
-		return false;
-	}
-
 
 	/****************************************************************************************** 
     *

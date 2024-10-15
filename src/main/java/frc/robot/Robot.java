@@ -62,7 +62,6 @@ public class Robot extends TimedRobot {
   private int apriltagAlignedStatus = CONT;
   
   private boolean shooterSpinning;
-  private boolean limelightLED;
 
   private double startTime = 0;
   private int iterCount = 0;
@@ -135,7 +134,7 @@ public class Robot extends TimedRobot {
     status = Robot.CONT;
 
     shooterSpinning = false;
-    limelightLED = false;
+    apriltags.setLED(false);
   }
 
   /**
@@ -422,7 +421,6 @@ public class Robot extends TimedRobot {
     // Get drive controller values
     //System.out.println("Forward speed: " + controls.getForwardSpeed() + " Strafe speed: " + controls.getStrafeSpeed() + " Rotate speed: " + controls.getRotateSpeed());
 
-
     System.out.println("Feet: " + apriltags.getDistanceToSpeakerFeet());
     double angle = SmartDashboard.getNumber("Shoot Angle", 327);
     boolean shoot = controls.enableShooter();
@@ -533,11 +531,6 @@ public class Robot extends TimedRobot {
     boolean runningIntake = controls.runIntake();
     boolean partyMode = controls.enablePartyMode();
     
-    if(controls.toggleLimelightLED()) {
-      limelightLED = !limelightLED;
-    }
-      apriltags.setLED(limelightLED);
-
     if(partyMode) {             // Top priority
       led.partyColor();           // Sets the color to rainbow
     } else if(hasNote) {        // If the grabber has a note, second priority
