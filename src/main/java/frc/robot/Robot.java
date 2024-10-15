@@ -635,8 +635,7 @@ public class Robot extends TimedRobot {
        enableCount = 1;
     }
     if (enableCount > 1)  {
-      System.err.println("Too many shooters enabled!");
-       return;  // Too many shooters enabled
+      return;  // Too many shooters enabled
     }
 
     if (shooterState == ShooterState.OFF)  {
@@ -654,6 +653,9 @@ public class Robot extends TimedRobot {
       // Checks states
       if(enableShooter) {
         shooterState = ShooterState.SPEAKER_SHOOT;
+      }
+      else if(crabShoot) {
+        shooterState = ShooterState.AUTO_AIM_ROTATE;
       }
       // Crab shoot
       else if(enableAutoShooter) {
