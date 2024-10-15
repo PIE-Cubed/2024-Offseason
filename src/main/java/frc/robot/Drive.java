@@ -40,11 +40,10 @@ public class Drive {
     private boolean autoPointAngled        = false; // Tracks if wheels have been angled before driving
     private boolean autoPointFirstTime     = true;
     public  boolean driveDistanceFirstTime = true;
-    public  boolean rotateWheelsFirstTime = true;
+    public  boolean rotateWheelsFirstTime  = true;
     public  boolean driveReverseDistanceFirstTime = true;
     private double  initXVelocity          = 0;
     private double  initYVelocity          = 0;
-    private double  targetPosition         = 0;
     private double  initRotateVelocity     = 0;
     private double  finishTime             = 0;
     double targetFeet                      = 0;
@@ -600,6 +599,7 @@ public class Drive {
      * @param power -> The power to apply to the motor(-1 - 1)
      * @returns Robot status
      * 
+     * @TODO
      * <p>//TODO Determine if this function should be removed as it isn't called anywhere
      * <p>I don't necessarly understand how it works(specifically with swerve module state calculations)
      * <p>It also only drives forward, similar to `driveDistanceWithAngle` and doesn't zero the wheels
@@ -846,19 +846,13 @@ public class Drive {
 
     /**
      * <p>Rotates wheels based on a drive command without giving the drive motors full power
-     * <p>Uses wheel optimizations
+     * <p>Uses wheel optimizations and field drive
      * @param driveX The x velocity
      * @param driveY The y velocity
      * @param driveZ The rotational velocity
      * @return Robot status, CONT or DONE
      */
     public int rotateWheels(double driveX, double driveY, double driveZ) {
-        /* TJM
-         * We are always using field oriented information even if we are not in field oriented mode.
-         * See teleop drive...
-         * 
-         * I added notes in Robot where you were calling this....
-         */
          SwerveModuleState[] swerveModuleStates = 
             swerveDriveKinematics.toSwerveModuleStates( ChassisSpeeds.fromFieldRelativeSpeeds(driveX, driveY, driveZ, new Rotation2d( getYawAdjusted() )));
         
@@ -884,6 +878,10 @@ public class Drive {
      * @param driveY
      * @param driveZ
      * @return Robot status, CONT or DONE
+     * 
+     * @TODO
+     * <p>//TODO This is unused!!! Do we really need this?
+     * <p>Maybe just use a boolean in the regular one to determine if you want to use optimizations or not
      */
     public int rotateWheelsNoOpt(double driveX, double driveY, double driveZ) {
         SwerveModuleState[] swerveModuleStates = 
@@ -928,7 +926,8 @@ public class Drive {
             // Robot has finished its rotation
             if(setpointCounter >= 5){
                 firstTime = true;
-                teleopDrive(0, 0, 0, false); // Stop rotating
+                stopWheels();
+                
                 return Robot.DONE;
             }
         }
@@ -945,7 +944,7 @@ public class Drive {
     /** //TODO Test this with colors! Try to target a note and rotate to face it
      * <p> It *should work the same, you just have to set it to a color pipeline
      * <p> Sort of wrapper function which uses an AprilTag as a target angle
-     * <p> If the pipeline is out of range, it returns Robot.FAIL
+     * <p> If there is no valid target, it returns Robot.FAIL
      * @return Robot status
      */
     public int alignWithAprilTag() {
@@ -960,15 +959,16 @@ public class Drive {
             double targetOffset = apriltags.getHorizontalOffset();
             double rotateVelocity = -1 * aprilTagRotatePidController.calculate(targetOffset, 0);    // Drive to zero
 
-            //System.out.println("Offset: " + targetOffset + " | Power: " + rotateVelocity);
 
             // Increment setpointCounter if the robot is at the setpoint
             if(aprilTagRotatePidController.atSetpoint()){
                 setpointCounter++;
+
                 // Robot has finished its rotation
                 if(setpointCounter >= 5){
                     firstTime = true;
-                    teleopDrive(0, 0, 0, false); // Stop rotating
+                    stopWheels();
+
                     return Robot.DONE;
                 }
             }
@@ -986,8 +986,9 @@ public class Drive {
 
     /**
      * <p> Sort of wrapper function which uses an AprilTag as a target angle
-     * <p> If the pipeline is out of range, it returns Robot.FAIL
-     * @return Robot status
+     * <p> If there is no valid target, it returns Robot.FAIL
+     * <p> Never really "exits" as it's supposed to be used continuously
+     * @return Robot status, CONT, FAIL
      */
     public int maintainShootingWithCrabDrive(double forwardSpeed, double strafeSpeed) {        
         // Only run if there is a valid Apriltag
@@ -1001,9 +1002,8 @@ public class Drive {
 
             return Robot.CONT;
         }
-        else {
-            return Robot.FAIL;  // No AprilTag in sight, fail
-        }
+        
+        return Robot.FAIL;  // No AprilTag in sight, fail
     }
 
     /******************************************************************************************
@@ -1067,10 +1067,6 @@ public class Drive {
      */
     public void resetYaw() {
         ahrs.zeroYaw();
-    }
-
-    public boolean gyroConnected() {
-        return ahrs.isConnected();
     }
 
     /****************************************************************************************** 
