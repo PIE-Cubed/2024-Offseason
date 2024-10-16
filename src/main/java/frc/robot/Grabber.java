@@ -102,6 +102,10 @@ public class Grabber {
      * 
      */
     // TODO test color sensor's ability to stop intake correctly
+    /*
+     * Mr McMahon comments to be deleted
+     *   I don't think isAuto does anything and can be removed
+     */
     public int intakeOutake(boolean intake, boolean outtake, boolean isAuto) {
         if (intake && outtake) {
             return Robot.CONT;

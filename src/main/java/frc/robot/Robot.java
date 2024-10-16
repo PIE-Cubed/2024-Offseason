@@ -556,6 +556,20 @@ public class Robot extends TimedRobot {
   /**
 	 * Controls the arm in TeleOp
 	 */
+   /*
+   * Mr McMahon comments - to be deleted
+   * I think we can modify this state machine
+   * Inputs that control states- moveToRestPosition, enableShooter, alignWithApriTagAndDrive
+   * States - Teleop, rest, shoot, autoShoot
+   *  Teleop runs arm up/down, rest runs rotateToRest, shoot does nothing, autoShoot does nothing (move processing to shooter like shoot state does)
+   * State Transition
+   *    teleop to rest, shoot or auto shoot
+   *    rest to teleop
+   *    shoot to teleop
+   *    autoshoot to teleop
+   * I think its an error if moveToRestPosition is true and either/both enableShooter/alignWithAprilTag is true
+   * Both enableShooter and alignWithAprilTag can be true, but since both do nothing here you can just stay in shoot/autoShoot state
+   */
   private void armControl() {
       if(armState == ArmState.TELEOP) {
           // Move the arm up/down incrementally
