@@ -726,6 +726,22 @@ public class Robot extends TimedRobot {
   /**
 	 * Controls the grabber in TeleOp
 	 */
+  /*
+   * Mr McMahon comments - to be deleted
+   * I think we can rewrite this as a state machine
+   * Inputs that control states- enableShooter, overrideIntake
+   * States - Teleop, overrideInput, shooterControl
+   *  Teleop runs intakeOutake, overrideInput run setMotorPower and shooterControl does nothing
+   * State Transition
+   *    teleop to overrideInput or shooterEnabled
+   *         I'm thinking that if in teleop and overrideIntake/shooterenable both true goto overrideIntake state 
+   *    overrideIntake to teleop
+   *         if in overrideIntake and overrideIntake/shooterenable both true stay in overrideIntake state 
+   *    shooterControl to teleop
+   *        if in shooterControl and overrideIntake/shooterenable both true goto overrideIntake state 
+
+   * I don't think we should lock out grabber in auto shoot mode unless actively shooting
+   */
 	private void grabberControl() {
     boolean enableShooter     = controls.enableShooter();
     boolean enableAutoShooter = controls.enableAutoShoot();
