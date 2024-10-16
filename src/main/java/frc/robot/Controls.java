@@ -269,9 +269,11 @@ public class Controls {
 	 * <p> For AprilTag functions
 	 * @return Manipulator controller right bumper pressed
 	 */
+	/* To be deleted */
 	public boolean enableAutoShoot() {
 		return manipulatorController.getRightBumper();
 	}
+
 	
 	// Shooting
 	/***
@@ -325,9 +327,11 @@ public class Controls {
 	 * Pressing the A button will move the arm slightly up to 333 deg
 	 * @return Manipulator controller A button pressed
 	 */
+	/*
 	public boolean moveToIntakePosition() {
 		return manipulatorController.getAButtonPressed();
 	}
+	*/
 
 	// Arm movement
 	/***
