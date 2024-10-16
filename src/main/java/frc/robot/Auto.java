@@ -22,7 +22,7 @@ public class Auto {
     private int driveStatus = Robot.CONT;
     private int status = Robot.CONT;
     
-    private final double SHOOT1_ANGLE = 327;   // Up against speaker
+    private final double SHOOT1_ANGLE = 325;   // Up against speaker
     
     private double apriltagShootAngle = SHOOT1_ANGLE;   // Start at against the speaker
 

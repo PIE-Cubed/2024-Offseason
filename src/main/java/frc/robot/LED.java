@@ -81,4 +81,8 @@ public class LED {
         setColor = PARTY_COLORS;
     }
 
+    public void autoAim() {
+        setColor = RED;
+    }
+
 }

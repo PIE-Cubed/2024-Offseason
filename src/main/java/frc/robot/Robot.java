@@ -527,18 +527,25 @@ public class Robot extends TimedRobot {
 	 * Controls the LEDs
 	 */
   private void ledControl() {
-    boolean hasNote = grabber.noteDetected();
+    boolean hasNote       = grabber.noteDetected();
     boolean runningIntake = controls.runIntake();
-    boolean partyMode = controls.enablePartyMode();
+    boolean partyMode     = controls.enablePartyMode();
+    boolean autoMode      = controls.alignWithAprilTagAndDrive();
     
     if(partyMode) {             // Top priority
       led.partyColor();           // Sets the color to rainbow
-    } else if(hasNote) {        // If the grabber has a note, second priority
+    } 
+    else if (autoMode) {
+      led.autoAim();
+    }
+    else if(hasNote) {        // If the grabber has a note, second priority
       led.capturedNoteColor();    // Sets the color to green
       //drive.rumbleController();
-    } else if(runningIntake) {  // If the grabber is running(no note), third priority
+    } 
+    else if(runningIntake) {  // If the grabber is running(no note), third priority
       led.gettingNoteColor();     // Sets the color to orange
-    } else {                    // Default state
+    } 
+    else {                    // Default state
       led.robolionsColor();       // Sets the color to blue-gold
     }
     

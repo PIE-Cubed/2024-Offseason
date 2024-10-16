@@ -335,7 +335,17 @@ public class Controls {
 	 * @return Manipulator controller DPAD UP button pressed
 	 */
 	public boolean moveArmUp() {
-		return manipulatorController.getPOV() == 0;
+		int angle;
+
+		angle =  manipulatorController.getPOV();
+		if ((angle == 0) || (angle == 45)  || (angle == 315))
+		{
+		    return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	/***
@@ -343,7 +353,17 @@ public class Controls {
 	 * @return Manipulator controller DPAD DOWN button pressed
 	 */
 	public boolean moveArmDown() {
-		return manipulatorController.getPOV() == 180;
+		int angle;
+
+		angle =  manipulatorController.getPOV();
+		if ((angle == 180) || (angle == 225)  || (angle == 135))
+		{
+		    return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	/***
