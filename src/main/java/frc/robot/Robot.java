@@ -561,7 +561,7 @@ public class Robot extends TimedRobot {
    * I think we can modify this state machine
    * Inputs that control states- moveToRestPosition, enableShooter, alignWithApriTagAndDrive
    * States - Teleop, rest, shoot, autoShoot
-   *  Teleop runs arm up/down, rest runs rotateToRest, shoot does nothing, autoShoot does nothing (move processing to shooter like shoot state does)
+   *  Teleop runs arm up/down, rest runs rotateToRest, shoot does nothing, autoShoot does maintainPosition
    * State Transition
    *    teleop to rest, shoot or auto shoot
    *    rest to teleop
@@ -632,6 +632,17 @@ public class Robot extends TimedRobot {
   /**
 	 * Controls the shooter in TeleOp
 	 */
+   /*
+   * Mr McMahon comments - to be deleted
+   * I think we can modify this state machine
+   * Inputs that control states- enableShooter, alignWithApriTagAndDrive (remove enableAutoShoot)
+   * States - Teleop, speakerShoot, autoAimRotate, autoAimRotateShoot
+   *  Teleop runs shoot wheels on/off, speakerShoot runs teleopShoot, autoAimRotate runs nothing, autoAimRotateShoot runs teleopShootCrabDrive
+   * State Transition
+   *    teleop to speakerShoot or autoShoot
+   *    speakerShoot to teleop or 
+   *    autoAimRotate to teleop
+   */
 	private void shooterControl() {
     boolean enableShooter     = controls.enableShooter();               // Shoot from against the speaker
     boolean enableAutoShooter = controls.enableAutoShoot();             // Shoot from multiple distances
