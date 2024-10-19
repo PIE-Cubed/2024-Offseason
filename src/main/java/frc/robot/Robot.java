@@ -682,6 +682,9 @@ public class Robot extends TimedRobot {
     //  Ring is shot when the manipulator pulls the trigger
     // Basically is the base point for crab drive
     else if (shooterState == ShooterState.AUTO_AIM_ROTATE)  {
+        // always spin up shooter if getting ready to shoot
+        shooter.spinup();
+        
         // armControl will set arm angle
         // driveControl will set robot orientation
         // shoot when manipulator pulls trigger
