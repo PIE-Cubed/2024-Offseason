@@ -562,37 +562,44 @@ public class Robot extends TimedRobot {
 	 * Controls the arm in TeleOp
 	 */
   private void armControl() {
+      boolean rest      = controls.moveToRestPosition();
+      boolean shoot     = controls.enableShooter();
+      boolean autoShoot = controls.alignWithAprilTagAndDrive();
+
+
       if(armState == ArmState.TELEOP) {
-          double armPos = arm.getElevationPosition();
+        //  double armPos = arm.getElevationPosition();
           
           // Move the arm up/down incrementally
           // Arm must be less than 180 (so it doesn't go into the robot)
           // Or greater than 320 (so it can rise up from rest)
-          if(controls.moveArmUp() && (armPos < 180 || armPos > 320)) {
+          if(controls.moveArmUp()) {
+       //   if(controls.moveArmUp() && (armPos < 180 || armPos > 320)) {
               arm.testElevate(-0.5);
           }
           // Arm must be greater than 0, but not higher than 180 (inside the robot, for positions like rest)
-          else if(controls.moveArmDown() && (armPos > 0 && armPos < 180)) {
-          arm.testElevate(0.5);
+          else if(controls.moveArmDown()) {
+       //   else if(controls.moveArmDown() && (armPos > 0 && armPos < 180)) {
+              arm.testElevate(0.5);
           }
           else {
-            arm.testElevate(0);
+              arm.testElevate(0);
           }
 
           // Check states
           // Attempted to shoot and goto rest state
           // Should we exit (stay in teleop), or goto rest? - Jack K
-          if (controls.moveToRestPosition() && (controls.enableShooter() || controls.alignWithAprilTagAndDrive())) {
+          if (rest && (shoot || autoShoot)) {
               System.out.println("ARM ERROR: Attempted to goto Rest and shoot or auto shoot");
               armState = ArmState.TELEOP;
           }
-          else if (controls.moveToRestPosition())  {
+          else if (rest)  {
               armState = ArmState.REST;
           }
-          else if (controls.enableShooter())  {
+          else if (shoot)  {
               armState = ArmState.SHOOT;
           }
-          else if (controls.alignWithAprilTagAndDrive()) {
+          else if (autoShoot) {
               armState = ArmState.AUTO_SHOOT;
           }
           else  {
@@ -616,7 +623,7 @@ public class Robot extends TimedRobot {
       }
       else if(armState == ArmState.SHOOT) {
           // Hands over control of the arm to shooterControl
-          if(controls.enableShooter() == false) {
+          if(shoot == false) {
             armState = ArmState.TELEOP;
           }
           else {
@@ -627,7 +634,7 @@ public class Robot extends TimedRobot {
           arm.maintainPosition(apriltags.calculateArmAngleToShoot());
 
           // Determine next state
-          if(controls.alignWithAprilTagAndDrive() == false) {
+          if(autoShoot == false) {
             armState = ArmState.TELEOP;
           } 
           else {
