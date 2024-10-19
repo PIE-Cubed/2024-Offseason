@@ -561,20 +561,6 @@ public class Robot extends TimedRobot {
   /**
 	 * Controls the arm in TeleOp
 	 */
-   /*
-   * Mr McMahon comments - to be deleted
-   * I think we can modify this state machine
-   * Inputs that control states- moveToRestPosition, enableShooter, alignWithApriTagAndDrive
-   * States - Teleop, rest, shoot, autoShoot
-   *  Teleop runs arm up/down, rest runs rotateToRest, shoot does nothing, autoShoot does maintainPosition
-   * State Transition
-   *    teleop to rest, shoot or auto shoot
-   *    rest to teleop
-   *    shoot to teleop
-   *    autoshoot to teleop
-   * I think its an error if moveToRestPosition is true and either/both enableShooter/alignWithAprilTag is true
-   * Both enableShooter and alignWithAprilTag can be true, but since both do nothing here you can just stay in shoot/autoShoot state
-   */
   private void armControl() {
       if(armState == ArmState.TELEOP) {
           double armPos = arm.getElevationPosition();
@@ -586,7 +572,7 @@ public class Robot extends TimedRobot {
               arm.testElevate(-0.5);
           }
           // Arm must be greater than 0, but not higher than 180 (inside the robot, for positions like rest)
-          else if(controls.moveArmDown() && (armPos > 0 && armPos > 180)) {
+          else if(controls.moveArmDown() && (armPos > 0 && armPos < 180)) {
           arm.testElevate(0.5);
           }
           else {
@@ -608,7 +594,7 @@ public class Robot extends TimedRobot {
           else if(controls.enableShooter())  {
               armState = ArmState.SHOOT;
           }
-          else if (controls.alignWithAprilTagAndDrive() || controls.enableAutoShoot()) {
+          else if (controls.alignWithAprilTagAndDrive()) {
             armState = ArmState.AUTO_SHOOT;
           }
 
@@ -640,9 +626,8 @@ public class Robot extends TimedRobot {
           arm.maintainPosition(apriltags.calculateArmAngleToShoot());
 
           // Determine next state
-          if(controls.alignWithAprilTagAndDrive() == false && controls.enableAutoShoot() == false) {
+          if(controls.alignWithAprilTagAndDrive() == false) {
             armState = ArmState.TELEOP;
-            armRestStatus = Robot.CONT;
           } 
           else {
             armState = ArmState.AUTO_SHOOT;
@@ -653,43 +638,11 @@ public class Robot extends TimedRobot {
   /**
 	 * Controls the shooter in TeleOp
 	 */
-   /*
-   * Mr McMahon comments - to be deleted
-   * I think we can modify this state machine
-   * Inputs that control states- enableShooter, alignWithApriTagAndDrive (remove enableAutoShoot)
-   * States - Teleop, speakerShoot, autoAimRotate, autoAimRotateShoot
-   *  Teleop runs shoot wheels on/off, speakerShoot runs teleopShoot, autoAimRotate runs nothing, autoAimRotateShoot runs teleopShootCrabDrive
-   * State Transition
-   *    teleop to speakerShoot or autoShoot
-   *    speakerShoot to teleop or 
-   *    autoAimRotate to teleop
-   */
 	private void shooterControl() {
     boolean enableShooter     = controls.enableShooter();               // Shoot from against the speaker
-    boolean enableAutoShooter = controls.enableAutoShoot();             // Shoot from multiple distances
     boolean crabShoot         = controls.alignWithAprilTagAndDrive();   // Shoot from multiple distances with auto rotation on target
     boolean startStopShooter  = controls.startShooterWheels();
     int     status;
-    int     enableCount = 0;
-
-
-    // check for errors
-    if (enableShooter == true)  {
-       enableCount++;
-    }
-    if (enableAutoShooter == true)  {
-       enableCount++;
-    }
-    if (crabShoot == true)  {
-       enableCount++;
-    }
-    // special case where crab shoot mode and shooter is enabled
-    if ((crabShoot == true) && (enableShooter == true) && (enableAutoShooter == false))  {
-       enableCount = 1;
-    }
-    if (enableCount > 1)  {
-      return;  // Too many shooters enabled
-    }
 
     if (shooterState == ShooterState.TELEOP)  {
       // Start or stop the shooter wheels, the start button flips the current state
@@ -711,11 +664,6 @@ public class Robot extends TimedRobot {
       else if(crabShoot) {
         shooterState = ShooterState.AUTO_AIM_ROTATE;
       }
-      // April Tag shoot
-      else if(enableAutoShooter) {
-        shooterState = ShooterState.AUTO_SHOOT;
-      }
-
     }
     // shoot against the speaker.  Will complete when releasing button.
     //  Shooter will spin down
@@ -728,18 +676,6 @@ public class Robot extends TimedRobot {
        else {
          shooterState = ShooterState.SPEAKER_SHOOT;
        }
-    }
-    //  Shoot from any distance using april tags for arm rotation
-    else if (shooterState == ShooterState.AUTO_SHOOT)  {
-       status = auto.apriltagShoot(enableAutoShooter);
-
-       if (status == Robot.DONE)  {
-         shooterState = ShooterState.TELEOP;
-       }
-       else  {
-         shooterState = ShooterState.AUTO_SHOOT;
-       }
-
     }
     // Shoot from any distance using april tags for arm rotation and
     //  april tags for rotation lock on target

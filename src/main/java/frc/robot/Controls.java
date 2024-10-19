@@ -261,19 +261,6 @@ public class Controls {
 	public boolean ejectNote() {
 		return manipulatorController.getLeftBumper();
 	}
-
-	/***
-	 * <p> Shoots from multiple distances
-	 * <p>		Adjusts arm angle only.  Rotation not controlled.
-	 * <p> Pressing the right bumper will shoot the note softly
-	 * <p> For AprilTag functions
-	 * @return Manipulator controller right bumper pressed
-	 */
-	/* To be deleted */
-	public boolean enableAutoShoot() {
-		return manipulatorController.getRightBumper();
-	}
-
 	
 	// Shooting
 	/***
