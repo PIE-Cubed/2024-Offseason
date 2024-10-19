@@ -315,24 +315,6 @@ public class Controls {
 		return manipulatorController.getXButtonPressed();
 	}
 
-	/**
-	 * Pressing the X button will move the arm slightly up to 333 deg
-	 * @return Manipulator controller X button pressed
-	 */
-	/*public boolean moveSlightlyUp() {
-		return manipulatorController.getXButtonPressed();
-	}*/
-
-	/**
-	 * Pressing the A button will move the arm slightly up to 333 deg
-	 * @return Manipulator controller A button pressed
-	 */
-	/*
-	public boolean moveToIntakePosition() {
-		return manipulatorController.getAButtonPressed();
-	}
-	*/
-
 	// Arm movement
 	/***
 	 * Pressing the DPAD UP button will move the arm upwards
@@ -369,28 +351,6 @@ public class Controls {
 			return false;
 		}
 	}
-
-	/***
-	 * Pressing RIGHT ANALOG DOWN will retract the arm
-	 * @return Manipulator controller RIGHT ANALOG DOWN pressed
-	 */
-	/*
-	public boolean retractArm() {
-		return manipulatorController.getRightY() < -0.3;
-	}
-	*/
-
-	/***
-	 * Pressing RIGHT ANALOG UP will extend the arm
-	 * @return Manipulator controller RIGHT ANALOG UP pressed
-	 */
-	/*
-	public boolean extendArm() {
-		return manipulatorController.getRightY() > 0.3;
-	}
-	*/
-
-
 
 	/****************************************************************************************** 
     *

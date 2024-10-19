@@ -67,7 +67,7 @@ public class Robot extends TimedRobot {
   private int iterCount = 0;
 
   /* arm states */
-  enum ArmState { TELEOP, AMP, REST, SHOOT, CRAB_SHOOT };
+  enum ArmState { TELEOP, REST, SHOOT, AUTO_SHOOT };
   private ArmState armState = ArmState.TELEOP;
 
   /* TeleOp States */
@@ -75,8 +75,13 @@ public class Robot extends TimedRobot {
   private TeleopState teleopState = TeleopState.TELEOP;
 
   /* Shooter States */
-  enum ShooterState { OFF, SPEAKER_SHOOT, AUTO_SHOOT, AUTO_AIM_ROTATE, AUTO_AIM_ROTATE_SHOOT };
-  private ShooterState shooterState = ShooterState.OFF;
+  enum ShooterState { TELEOP, SPEAKER_SHOOT, AUTO_SHOOT, AUTO_AIM_ROTATE, AUTO_AIM_ROTATE_SHOOT };
+  private ShooterState shooterState = ShooterState.TELEOP;
+
+  /* Grabber States */
+  enum GrabberState { TELEOP, OVERRIDE, SHOOTER_CONTROL };
+  private GrabberState grabberState = GrabberState.TELEOP;
+
 
 	/**
 	 * Constructor
@@ -572,15 +577,28 @@ public class Robot extends TimedRobot {
    */
   private void armControl() {
       if(armState == ArmState.TELEOP) {
+          double armPos = arm.getElevationPosition();
+          
           // Move the arm up/down incrementally
-          if(controls.moveArmUp()) {
+          // Arm must be less than 180 (so it doesn't go into the robot)
+          // Or greater than 320 (so it can rise up from rest)
+          if(controls.moveArmUp() && (armPos < 180 || armPos > 320)) {
               arm.testElevate(-0.5);
           }
-          else if(controls.moveArmDown()) {
-            arm.testElevate(0.5);
+          // Arm must be greater than 0, but not higher than 180 (inside the robot, for positions like rest)
+          else if(controls.moveArmDown() && (armPos > 0 && armPos > 180)) {
+          arm.testElevate(0.5);
           }
           else {
             arm.testElevate(0);
+          }
+
+          // Attempted to shoot and goto rest state
+          // Should we exit (stay in teleop), or goto rest? - Jack K
+          if(controls.moveToRestPosition() && (controls.enableShooter() || controls.alignWithAprilTagAndDrive())) {
+            System.out.println("ARM ERROR: Attempted to shoot or crab shoot while in rest state");
+            
+            return;
           }
 
           // Check states
@@ -590,14 +608,14 @@ public class Robot extends TimedRobot {
           else if(controls.enableShooter())  {
               armState = ArmState.SHOOT;
           }
-          else if (controls.alignWithAprilTagAndDrive()) {
-            armState = ArmState.CRAB_SHOOT;
+          else if (controls.alignWithAprilTagAndDrive() || controls.enableAutoShoot()) {
+            armState = ArmState.AUTO_SHOOT;
           }
 
       }
       // TODO See if the delay is necessary
       else if(armState == ArmState.REST) {
-          armStatus = arm.rotateToRest(1.5);;          
+          armStatus = arm.rotateToRest(1.5);
           armRestStatus = auto.autoDelayMS(1500);
 
           if (armStatus == Robot.DONE || armRestStatus == Robot.DONE) {
@@ -605,9 +623,12 @@ public class Robot extends TimedRobot {
               armRestStatus = Robot.CONT;
               armIntakeStatus = Robot.CONT;
           }
+          else {
+            armState = ArmState.REST;
+          }
       }
       else if(armState == ArmState.SHOOT) {
-          // Hand over control of the arm to shooterControl
+          // Hands over control of the arm to shooterControl
           if(controls.enableShooter() == false) {
             armState = ArmState.TELEOP;
           }
@@ -615,16 +636,16 @@ public class Robot extends TimedRobot {
             armState = ArmState.SHOOT;
           }
       }
-      else if(armState == ArmState.CRAB_SHOOT) {
+      else if(armState == ArmState.AUTO_SHOOT) {
           arm.maintainPosition(apriltags.calculateArmAngleToShoot());
 
           // Determine next state
-          if(controls.alignWithAprilTagAndDrive() == false) {
+          if(controls.alignWithAprilTagAndDrive() == false && controls.enableAutoShoot() == false) {
             armState = ArmState.TELEOP;
             armRestStatus = Robot.CONT;
           } 
           else {
-            armState = ArmState.CRAB_SHOOT;
+            armState = ArmState.AUTO_SHOOT;
           }
       }
   }
@@ -670,7 +691,7 @@ public class Robot extends TimedRobot {
       return;  // Too many shooters enabled
     }
 
-    if (shooterState == ShooterState.OFF)  {
+    if (shooterState == ShooterState.TELEOP)  {
       // Start or stop the shooter wheels, the start button flips the current state
       if(startStopShooter == true) {
         shooterSpinning = !shooterSpinning;
@@ -686,10 +707,11 @@ public class Robot extends TimedRobot {
       if(enableShooter) {
         shooterState = ShooterState.SPEAKER_SHOOT;
       }
+      // Crab shoot
       else if(crabShoot) {
         shooterState = ShooterState.AUTO_AIM_ROTATE;
       }
-      // Crab shoot
+      // April Tag shoot
       else if(enableAutoShooter) {
         shooterState = ShooterState.AUTO_SHOOT;
       }
@@ -701,7 +723,7 @@ public class Robot extends TimedRobot {
        status = auto.teleopShoot(enableShooter);
 
        if (status == Robot.DONE)  {
-         shooterState = ShooterState.OFF;
+         shooterState = ShooterState.TELEOP;
        }
        else {
          shooterState = ShooterState.SPEAKER_SHOOT;
@@ -710,8 +732,9 @@ public class Robot extends TimedRobot {
     //  Shoot from any distance using april tags for arm rotation
     else if (shooterState == ShooterState.AUTO_SHOOT)  {
        status = auto.apriltagShoot(enableAutoShooter);
+
        if (status == Robot.DONE)  {
-         shooterState = ShooterState.OFF;
+         shooterState = ShooterState.TELEOP;
        }
        else  {
          shooterState = ShooterState.AUTO_SHOOT;
@@ -727,7 +750,7 @@ public class Robot extends TimedRobot {
         // driveControl will set robot orientation
         // shoot when manipulator pulls trigger
         if (crabShoot == false)  {
-            shooterState = ShooterState.OFF;
+            shooterState = ShooterState.TELEOP;
         }
         else if (enableShooter == true)  {
             shooterState = ShooterState.AUTO_AIM_ROTATE_SHOOT;
@@ -751,36 +774,35 @@ public class Robot extends TimedRobot {
   /**
 	 * Controls the grabber in TeleOp
 	 */
-  /*
-   * Mr McMahon comments - to be deleted
-   * I think we can rewrite this as a state machine
-   * Inputs that control states- enableShooter, overrideIntake
-   * States - Teleop, overrideInput, shooterControl
-   *  Teleop runs intakeOutake, overrideInput run setMotorPower and shooterControl does nothing
-   * State Transition
-   *    teleop to overrideInput or shooterEnabled
-   *         I'm thinking that if in teleop and overrideIntake/shooterenable both true goto overrideIntake state 
-   *    overrideIntake to teleop
-   *         if in overrideIntake and overrideIntake/shooterenable both true stay in overrideIntake state 
-   *    shooterControl to teleop
-   *        if in shooterControl and overrideIntake/shooterenable both true goto overrideIntake state 
-
-   * I don't think we should lock out grabber in auto shoot mode unless actively shooting
-   */
-	private void grabberControl() {
+  private void grabberControl() {
     boolean enableShooter     = controls.enableShooter();
-    boolean enableAutoShooter = controls.enableAutoShoot();
+    boolean enableOverride    = controls.overrideIntake();
 
-    // If no automatic functions or override is running, use manual control
-    if ((enableShooter             == false) && 
-        (enableAutoShooter         == false) &&
-        (controls.overrideIntake() == false))  {
-        grabber.intakeOutake(controls.runIntake(), controls.ejectNote(), false);  
-    }
+    if(grabberState == GrabberState.TELEOP) {
+      // Check if we're still in this state, override takes priority
+      if(enableOverride) {
+        grabberState = GrabberState.OVERRIDE;
+      }
+      else if(enableShooter) {
+        grabberState = GrabberState.SHOOTER_CONTROL;
+      }
 
-    // Overrides all functions and intakes
-    if(controls.overrideIntake()) {
-      grabber.setMotorPower(grabber.INTAKE_POWER);      
+      grabber.intakeOutake(controls.runIntake(), controls.ejectNote(), false);
     }
-	}
+    else if(grabberState == GrabberState.OVERRIDE) {
+      if(enableOverride == false) {
+        grabberState = GrabberState.TELEOP;
+      }
+
+      grabber.setMotorPower(grabber.INTAKE_POWER);
+    }
+    else if(grabberState == GrabberState.SHOOTER_CONTROL) {
+      if(enableShooter == false) {
+        grabberState = GrabberState.TELEOP;
+      }
+      else if(enableOverride) {
+        grabberState = GrabberState.OVERRIDE;
+      }
+    }
+  }
 }
