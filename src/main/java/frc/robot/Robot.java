@@ -579,23 +579,24 @@ public class Robot extends TimedRobot {
             arm.testElevate(0);
           }
 
+          // Check states
           // Attempted to shoot and goto rest state
           // Should we exit (stay in teleop), or goto rest? - Jack K
-          if(controls.moveToRestPosition() && (controls.enableShooter() || controls.alignWithAprilTagAndDrive())) {
-            System.out.println("ARM ERROR: Attempted to shoot or crab shoot while in rest state");
-            
-            return;
+          if (controls.moveToRestPosition() && (controls.enableShooter() || controls.alignWithAprilTagAndDrive())) {
+              System.out.println("ARM ERROR: Attempted to goto Rest and shoot or auto shoot");
+              armState = ArmState.TELEOP;
           }
-
-          // Check states
-          if(controls.moveToRestPosition())  {
+          else if (controls.moveToRestPosition())  {
               armState = ArmState.REST;
           }
-          else if(controls.enableShooter())  {
+          else if (controls.enableShooter())  {
               armState = ArmState.SHOOT;
           }
           else if (controls.alignWithAprilTagAndDrive()) {
-            armState = ArmState.AUTO_SHOOT;
+              armState = ArmState.AUTO_SHOOT;
+          }
+          else  {
+              armState = ArmState.TELEOP;
           }
 
       }
@@ -684,7 +685,7 @@ public class Robot extends TimedRobot {
     else if (shooterState == ShooterState.AUTO_AIM_ROTATE)  {
         // always spin up shooter if getting ready to shoot
         shooter.spinup();
-        
+
         // armControl will set arm angle
         // driveControl will set robot orientation
         // shoot when manipulator pulls trigger
