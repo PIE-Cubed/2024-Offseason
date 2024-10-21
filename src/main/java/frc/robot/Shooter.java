@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.CANSparkFlex;
 
@@ -94,5 +95,7 @@ import com.revrobotics.CANSparkFlex;
     public void testSpin() {
         shooterMotor2.set(0.05);
     }
-
+    public boolean shooterSpinning() {
+        return shooterMotor1.get() != 0;
+    }
 }

@@ -236,8 +236,12 @@ public class Auto {
             case 7:
                 apriltagShootAngle = apriltags.calculateArmAngleToShoot();
                 if(apriltagShootAngle == -1){
+                    apriltagShootAngle = 341.5; // Just in case, go to 341.5
                     System.out.println("Can't see valid AprilTag");
+                } else {
+                    System.out.println("Saw a tag but ignoring it and using a fixed position");
                 }
+                apriltagShootAngle = 341.5;
                 System.out.println("Shooting at " + apriltagShootAngle + "deg");
                 
                 status = arm.rotateArm(apriltagShootAngle);
@@ -377,6 +381,12 @@ public class Auto {
             case 12:
                 //April tag distance is 9.49 FT, low by 1-2 degrees
                 apriltagShootAngle = apriltags.calculateArmAngleToShoot();
+
+                if(apriltagShootAngle == -1) {
+                    apriltagShootAngle = 343;
+                    System.out.println("Cannot see AprilTag, shooting at 331.5");
+                }
+
                 status = arm.rotateArm(apriltagShootAngle);
                 break;
 

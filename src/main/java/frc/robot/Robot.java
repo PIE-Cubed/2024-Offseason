@@ -268,6 +268,7 @@ public class Robot extends TimedRobot {
     
     // Drivers check this to see if they grabbed a note
     SmartDashboard.putBoolean("Grabber has Note", grabber.noteDetected());
+    SmartDashboard.putBoolean("Shooter Wheels Running", shooter.shooterSpinning());
   }
 
   /** This function is called once when the robot is disabled. */
@@ -546,10 +547,13 @@ public class Robot extends TimedRobot {
     else if(hasNote) {        // If the grabber has a note, second priority
       led.capturedNoteColor();    // Sets the color to green
       //drive.rumbleController();
-    } 
+    }
+    else if(shooter.shooterSpinning()) {
+      led.shooterSpinningColor();
+    }
     else if(runningIntake) {  // If the grabber is running(no note), third priority
       led.gettingNoteColor();     // Sets the color to orange
-    } 
+    }
     else {                    // Default state
       led.robolionsColor();       // Sets the color to blue-gold
     }
