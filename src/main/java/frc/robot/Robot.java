@@ -579,12 +579,12 @@ public class Robot extends TimedRobot {
           // Or greater than 320 (so it can rise up from rest)
           if(controls.moveArmUp()) {
        //   if(controls.moveArmUp() && (armPos < 180 || armPos > 320)) {
-              arm.testElevate(-0.5);
+              arm.testElevate(-0.75);
           }
           // Arm must be greater than 0, but not higher than 180 (inside the robot, for positions like rest)
           else if(controls.moveArmDown()) {
        //   else if(controls.moveArmDown() && (armPos > 0 && armPos < 180)) {
-              arm.testElevate(0.5);
+              arm.testElevate(0.75);
           }
           else {
               arm.testElevate(0);
