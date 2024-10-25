@@ -241,7 +241,7 @@ public class Auto {
                 } else {
                     System.out.println("Saw a tag but ignoring it and using a fixed position");
                 }
-                apriltagShootAngle = 341.5;
+               // apriltagShootAngle = 341.5;
                 System.out.println("Shooting at " + apriltagShootAngle + "deg");
                 
                 status = arm.rotateArm(apriltagShootAngle);
@@ -330,7 +330,7 @@ public class Auto {
                 break;
 
             case 7:
-                status = drive.rotateRobot(Math.toRadians(allianceAngleModifier * 47));
+                status = drive.rotateRobot(Math.toRadians(allianceAngleModifier * 50));
                 break;
                 
             // Rotate the wheels back to zero before driving forward

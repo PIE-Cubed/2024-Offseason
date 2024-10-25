@@ -41,6 +41,7 @@ public class AprilTags {
      */
     public double calculateArmAngleToShoot() {
         double delta;
+        double angle;
 
 
         //double distance = getDistanceToSpeakerFeet() * 30.48;
@@ -52,38 +53,11 @@ public class AprilTags {
         } else {
           //  System.out.println("Distance to AprilTag " + distance + "ft");
         }
-        double angle = (-0.0139 * Math.pow(distance, 3)) + (0.1651 * Math.pow(distance, 2)) + (3.8277 * distance) + 315.39;
-        
-        if(angle >= 360) {
-            angle -= 360;
-        }
 
-        // If the distance is >= 8 feet, subtract 1.5 degrees
-        // for every foot past the 8 feet
-        //if (distance >= 243.84) { // 8 feet
-        //    angle -= Math.abs(1.51 * ((distance / 30.48) - 8));
-        //    angle = Math.abs(angle);
-        //}
-        if(angle <= 330 && angle >= 5) {
-        //    System.out.println("Angle(" + angle + ") out of range (5-330deg)! Using 339");
-            angle = 339;
-        }
-        //System.out.println(distance);
-
-        // TODO Fix the actual angle function as this is temporary
-        if(distance > 9.0 && distance < 9.4) {
-        //    System.out.println("Setting shooter angle to 340");
-            angle = 340;
-        } else if(distance > 9.6 && distance < 10.4){
-        //
-            System.out.println("Setting shooter angle to 343");
-            angle = 343;
-        }
-
-        /* 5.46 feet @ 327 degrees */
+        /* 5.46 feet @ 325 degrees */
         if ((distance >= 5.5)  &&  (distance < 6.0))  {
             delta = distance - 5.5;
-            angle = (delta * (330 -327)) + 327;
+            angle = (delta * (330 -325)) + 325;
 
         }
         /* 6 feet @ 330 degrees */
@@ -94,34 +68,37 @@ public class AprilTags {
         /* 7 feet @ 333 degrees */
         else if ((distance >= 7.0)  &&  (distance < 8.0))  {
             delta = distance - 7;
-            angle = (delta * (335 - 333)) + 333;
+            angle = (delta * (338 - 333)) + 333;
         }
-        /* 8 feet @ 335 degrees */
+        /* 8 feet @ 338 degrees */
         else if ((distance >= 8.0)  &&  (distance < 9.0))  {
             delta = distance - 8;
-            angle = (delta * (339.5 - 335)) + 335;
+            angle = (delta * (342.5 - 338)) + 338;
         }
-        /* 9 feet @ 339.5 degrees */
+        /* 9 feet @ 343.5 degrees */
         else if ((distance >= 9.0)  &&  (distance < 10.0))  {
             delta = distance - 9;
-            angle = (delta * (342.5 - 339.5)) + 339.5;
-        }
-        /* 10 feet @ 342.5 degrees */
-        else if ((distance >= 10.0)  &&  (distance < 11.0))  {
-            delta = distance - 10;
             angle = (delta * (345 - 342.5)) + 342.5;
         }
-        /* 11 feet @ 345 degrees */
+        /* 10 feet @ 345 degrees */
+        else if ((distance >= 10.0)  &&  (distance < 11.0))  {
+            delta = distance - 10;
+            angle = (delta * (347.5 - 345)) + 345;
+        }
+        /* 11 feet @ 347.5 degrees */
         else if ((distance >= 11.0)  &&  (distance < 12.0))  {
             delta = distance - 11;
-            angle = (delta * (346 - 345)) + 345;
+            angle = (delta * (349.5 - 347.5)) + 347.5;
         }
-        /* 12 feet @ 346 degrees */
+        /* 12 feet @ 349.5 degrees */
         else if ((distance >= 12.0)  &&  (distance < 13.0))  {
             delta = distance - 12;
-            angle = (delta * (348 - 346)) + 346;
+            angle = (delta * (351 - 349.5)) + 349.5;
         }
-        /* 13 feet @ 348 degrees */
+        else  {
+            angle = 325;   // rest angle
+        }
+        /* 13 feet @ 351 degrees */
         
         return angle;
     }
