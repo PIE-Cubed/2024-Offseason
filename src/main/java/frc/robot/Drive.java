@@ -83,7 +83,7 @@ public class Drive {
     private final double ROTATE_TOLERANCE_RADIANS = 0.05;
     private final double ROTATE_ADJUST_TOLERANCE_RADIANS = 0.01745329;   // ~1 degree
     private final double ROTATE_TOLERANCE_DEGREES = 3;
-    private final double APRILTAG_TOLERANCE_DEGREES = 3.5;
+    private final double APRILTAG_TOLERANCE_DEGREES = 1;
 
     // driveDistanceWithAngleNew variables
     private Pose2d initialPose;
@@ -180,7 +180,7 @@ public class Drive {
         rotatePidController.enableContinuousInput(Math.PI, -Math.PI);
 
         // TODO Get PID snappier
-        aprilTagRotatePidController = new PIDController(0.014, 0, 0);
+        aprilTagRotatePidController = new PIDController(0.018, 0, 0);   // Slow, but reliable, 0.014
         aprilTagRotatePidController.setTolerance(APRILTAG_TOLERANCE_DEGREES);
         aprilTagRotatePidController.enableContinuousInput(180, -180);
 
