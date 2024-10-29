@@ -48,17 +48,14 @@ public class AprilTags {
         //double angle = (CUBED_CONST * Math.pow(distance, 3)) - (SQUARED_CONST * Math.pow(distance, 2)) + (SINGLE_CONST * distance) + OFFSET;
         double distance = getDistanceToSpeakerFeet();
         if(distance == -1) {
-            System.out.println("ERROR: Unable to get AprilTag");
+            System.err.println("ERROR: Unable to get AprilTag");
             return -1;
-        } else {
-          //  System.out.println("Distance to AprilTag " + distance + "ft");
         }
 
         /* 5.46 feet @ 325 degrees */
         if ((distance >= 5.5)  &&  (distance < 6.0))  {
             delta = distance - 5.5;
             angle = (delta * (330 -325)) + 325;
-
         }
         /* 6 feet @ 330 degrees */
         else if ((distance >= 6.0)  &&  (distance < 7.0))  {
@@ -99,7 +96,7 @@ public class AprilTags {
             angle = 325;   // rest angle
         }
         /* 13 feet @ 351 degrees */
-        
+
         return angle;
     }
 

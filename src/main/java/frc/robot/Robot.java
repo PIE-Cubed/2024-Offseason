@@ -592,9 +592,8 @@ public class Robot extends TimedRobot {
 
           // Check states
           // Attempted to shoot and goto rest state
-          // Should we exit (stay in teleop), or goto rest? - Jack K
           if (rest && (shoot || autoShoot)) {
-              System.out.println("ARM ERROR: Attempted to goto Rest and shoot or auto shoot");
+              System.err.println("ARM ERROR: Attempted to goto Rest and shoot or auto shoot");
               armState = ArmState.TELEOP;
           }
           else if (rest)  {
@@ -635,7 +634,16 @@ public class Robot extends TimedRobot {
           }
       }
       else if(armState == ArmState.AUTO_SHOOT) {
-          arm.maintainPosition(apriltags.calculateArmAngleToShoot());
+          double shootAngle = apriltags.calculateArmAngleToShoot();
+
+          if(shootAngle < 0) {
+            System.err.println("ERROR: Bad AprilTag angle. Negative value: " + shootAngle);
+            System.out.println("Rotating to rest...");
+            arm.maintainPosition(arm.ARM_REST_POSITION_DEGREES);
+          }
+          else {
+            arm.maintainPosition(shootAngle);
+          }
 
           // Determine next state
           if(autoShoot == false) {
