@@ -32,7 +32,6 @@ public class Robot extends TimedRobot {
 	Controls             controls;
   Shooter              shooter;
   Grabber              grabber;
-  Climber              climber;
 	Drive                drive;
 	Auto                 auto;
   Arm                  arm;
@@ -63,13 +62,12 @@ public class Robot extends TimedRobot {
   private int apriltagAlignedStatus = CONT;
   
   private boolean shooterSpinning;
-  private boolean limelightLED;
 
   private double startTime = 0;
   private int iterCount = 0;
 
   /* arm states */
-  enum ArmState { TELEOP, CLIMB, AMP, REST, INTAKE, SHOOT, CRAB_SHOOT };
+  enum ArmState { TELEOP, REST, SHOOT, AUTO_SHOOT };
   private ArmState armState = ArmState.TELEOP;
 
   /* TeleOp States */
@@ -77,8 +75,13 @@ public class Robot extends TimedRobot {
   private TeleopState teleopState = TeleopState.TELEOP;
 
   /* Shooter States */
-  enum ShooterState { OFF, AMP_SHOOT, AUTO_SHOOT, AUTO_AIM_ROTATE, AUTO_AIM_ROTATE_SHOOT };
-  private ShooterState shooterState = ShooterState.OFF;
+  enum ShooterState { TELEOP, SPEAKER_SHOOT, AUTO_SHOOT, AUTO_AIM_ROTATE, AUTO_AIM_ROTATE_SHOOT };
+  private ShooterState shooterState = ShooterState.TELEOP;
+
+  /* Grabber States */
+  enum GrabberState { TELEOP, OVERRIDE, SHOOTER_CONTROL };
+  private GrabberState grabberState = GrabberState.TELEOP;
+
 
 	/**
 	 * Constructor
@@ -101,7 +104,6 @@ public class Robot extends TimedRobot {
 		controls  = new Controls();
 		position  = new Odometry(drive);
     shooter   = new Shooter();
-    climber   = new Climber();
     arm       = new Arm();
 		auto      = new Auto(drive, position, arm, grabber, shooter, apriltags);
     led       = new LED();
@@ -137,7 +139,7 @@ public class Robot extends TimedRobot {
     status = Robot.CONT;
 
     shooterSpinning = false;
-    limelightLED = false;
+    apriltags.setLED(false);
   }
 
   /**
@@ -260,15 +262,13 @@ public class Robot extends TimedRobot {
     
     // Allows for shooting notes
     shooterControl();
-
-    // Allows for controlling the climber
-    //climberControl();
     
     // Allows for controlling the LEDs
     ledControl();
     
     // Drivers check this to see if they grabbed a note
     SmartDashboard.putBoolean("Grabber has Note", grabber.noteDetected());
+    SmartDashboard.putBoolean("Shooter Wheels Running", shooter.shooterSpinning());
   }
 
   /** This function is called once when the robot is disabled. */
@@ -297,7 +297,14 @@ public class Robot extends TimedRobot {
     //driveDistance = false;
     startTime = System.currentTimeMillis();
     iterCount = 0;
+
+    testStatus = Robot.CONT;
+    on = false;
+    SmartDashboard.putNumber("Shoot Angle", 327);
   }
+  
+  int testStatus = Robot.CONT;
+  boolean on = false;
 
   /** This function is called periodically during test mode. */
   @Override
@@ -420,34 +427,21 @@ public class Robot extends TimedRobot {
     // Get drive controller values
     //System.out.println("Forward speed: " + controls.getForwardSpeed() + " Strafe speed: " + controls.getStrafeSpeed() + " Rotate speed: " + controls.getRotateSpeed());
 
+    System.out.println("Feet: " + apriltags.getDistanceToSpeakerFeet());
+    double angle = SmartDashboard.getNumber("Shoot Angle", 327);
+    boolean shoot = controls.enableShooter();
+    
+    if(shoot){
+      on = true;
+    }
 
-
-
-
-
-
-
-
-
-
-      // System.out.println("Feet: " + apriltags.getDistanceToSpeakerFeet());
-
-      // double angle = 343;   // 340 - 9.2ft
-      // if(statusa != Robot.DONE) {
-      //     statusa = auto.testShoot(angle);
-      // }
-
-        System.out.println(controls.alignWithAprilTagAndDrive());
-
-
-
-
-
-
-
+    if(testStatus != Robot.DONE && on) {
+      testStatus = auto.testShoot(angle);
+    } else {
+      shooter.spindown();
+      on = false;
+    }
   }
-  int statusa = Robot.CONT;
-  boolean on = false;
 
   /** This function is called once when the robot is first started up. */
   @Override
@@ -539,23 +533,28 @@ public class Robot extends TimedRobot {
 	 * Controls the LEDs
 	 */
   private void ledControl() {
-    boolean hasNote = grabber.noteDetected();
+    boolean hasNote       = grabber.noteDetected();
     boolean runningIntake = controls.runIntake();
-    boolean partyMode = controls.enablePartyMode();
+    boolean partyMode     = controls.enablePartyMode();
+    boolean autoMode      = controls.alignWithAprilTagAndDrive();
     
-    if(controls.toggleLimelightLED()) {
-      limelightLED = !limelightLED;
-    }
-      apriltags.setLED(limelightLED);
-
-    if(partyMode) {             // If the robot is done climbing, top priority
+    if(partyMode) {             // Top priority
       led.partyColor();           // Sets the color to rainbow
-    } else if(hasNote) {        // If the grabber has a note, second priority
+    } 
+    else if (autoMode) {
+      led.autoAim();
+    }
+    else if(hasNote) {        // If the grabber has a note, second priority
       led.capturedNoteColor();    // Sets the color to green
       //drive.rumbleController();
-    } else if(runningIntake) {  // If the grabber is running(no note), third priority
+    }
+    else if(shooter.shooterSpinning()) {
+      led.shooterSpinningColor();
+    }
+    else if(runningIntake) {  // If the grabber is running(no note), third priority
       led.gettingNoteColor();     // Sets the color to orange
-    } else {                    // Default state
+    }
+    else {                    // Default state
       led.robolionsColor();       // Sets the color to blue-gold
     }
     
@@ -567,70 +566,53 @@ public class Robot extends TimedRobot {
 	 * Controls the arm in TeleOp
 	 */
   private void armControl() {
-      boolean enableShoot = controls.moveToAmpPosition();
-  
-      if (armState == ArmState.TELEOP)
-      {
+      boolean rest      = controls.moveToRestPosition();
+      boolean shoot     = controls.enableShooter();
+      boolean autoShoot = controls.alignWithAprilTagAndDrive();
+
+
+      if(armState == ArmState.TELEOP) {
+        //  double armPos = arm.getElevationPosition();
+          
           // Move the arm up/down incrementally
+          // Arm must be less than 180 (so it doesn't go into the robot)
+          // Or greater than 320 (so it can rise up from rest)
           if(controls.moveArmUp()) {
-              arm.testElevate(-0.5);
+       //   if(controls.moveArmUp() && (armPos < 180 || armPos > 320)) {
+              arm.testElevate(-0.75);
           }
-          else if (controls.moveArmDown()) {
-            arm.testElevate(0.5);
+          // Arm must be greater than 0, but not higher than 180 (inside the robot, for positions like rest)
+          else if(controls.moveArmDown()) {
+       //   else if(controls.moveArmDown() && (armPos > 0 && armPos < 180)) {
+              arm.testElevate(0.75);
           }
           else {
-            arm.testElevate(0);
+              arm.testElevate(0);
           }
 
-          // next state
-          if (controls.autoClimb())  {
-              armState = ArmState.CLIMB;
+          // Check states
+          // Attempted to shoot and goto rest state
+          if (rest && (shoot || autoShoot)) {
+              System.err.println("ARM ERROR: Attempted to goto Rest and shoot or auto shoot");
+              armState = ArmState.TELEOP;
           }
-          else if (controls.moveToAmpPosition())  {
-              armState = ArmState.AMP;
-          }
-          else if (controls.moveToRestPosition())  {
+          else if (rest)  {
               armState = ArmState.REST;
           }
-          else if (controls.moveToIntakePosition())  {
-              armState = ArmState.INTAKE;
-          }
-          else if (controls.enableShooter())  {
+          else if (shoot)  {
               armState = ArmState.SHOOT;
           }
-          else if (controls.alignWithAprilTagAndDrive()) {
-            armState = ArmState.CRAB_SHOOT;
-          }
-
-      }
-      else if (armState == ArmState.CLIMB)
-      {
-          armStatus = arm.rotateArm(90);
-
-          // next state
-          if (armStatus == Robot.DONE)  {
-            armState = ArmState.TELEOP;
+          else if (autoShoot) {
+              armState = ArmState.AUTO_SHOOT;
           }
           else  {
-              armState = ArmState.CLIMB;
-          }
-      }
-      else if (armState == ArmState.AMP)
-      {
-          //armStatus = auto.teleopShootAmp(enableShoot);
-          armStatus = auto.ampPosition();
-          if (armStatus == Robot.DONE) {
               armState = ArmState.TELEOP;
-          } 
-          else {
-              armState = ArmState.AMP;
           }
+
       }
-      else if (armState == ArmState.REST)
-      {
-          //armRotateStatus = arm.rotateArm(arm.ARM_REST_POSITION_DEGREES);
-          //armStatus = arm.extendToRest();
-          armStatus = auto.restingPosition();          
+      // TODO See if the delay is necessary
+      else if(armState == ArmState.REST) {
+          armStatus = arm.rotateToRest(1.5);
           armRestStatus = auto.autoDelayMS(1500);
 
           if (armStatus == Robot.DONE || armRestStatus == Robot.DONE) {
@@ -638,43 +620,37 @@ public class Robot extends TimedRobot {
               armRestStatus = Robot.CONT;
               armIntakeStatus = Robot.CONT;
           }
-      }
-      else if (armState == ArmState.INTAKE)
-      {
-          armStatus = auto.intakePosition();
-          armIntakeStatus = auto.autoDelayMS(1500);
-
-          if (armStatus == Robot.DONE || armIntakeStatus == Robot.DONE) {
-              armState = ArmState.TELEOP;
-              armRestStatus = Robot.CONT;
-              armIntakeStatus = Robot.CONT;
+          else {
+            armState = ArmState.REST;
           }
       }
-      // shoot up against AMP
-      else if (armState == ArmState.SHOOT)
-      {
-          // Hand over control of the arm to shooterControl
-          if (controls.enableShooter() == false) {
-              armState = ArmState.TELEOP;
+      else if(armState == ArmState.SHOOT) {
+          // Hands over control of the arm to shooterControl
+          if(shoot == false) {
+            armState = ArmState.TELEOP;
           }
           else {
             armState = ArmState.SHOOT;
           }
       }
-      else if (armState == ArmState.CRAB_SHOOT)
-      {
-          //armRotateStatus = arm.rotateArm(arm.ARM_REST_POSITION_DEGREES);
-          //armStatus = arm.extendToRest();
-          arm.maintainPosition(apriltags.calculateArmAngleToShoot());  
-          //armStatus = auto.extendArmWithTimer(); 
+      else if(armState == ArmState.AUTO_SHOOT) {
+          double shootAngle = apriltags.calculateArmAngleToShoot();
+
+          if(shootAngle < 0) {
+            System.err.println("ERROR: Bad AprilTag angle. Negative value: " + shootAngle);
+            System.out.println("Rotating to rest...");
+            arm.maintainPosition(arm.ARM_REST_POSITION_DEGREES);
+          }
+          else {
+            arm.maintainPosition(shootAngle);
+          }
 
           // Determine next state
-          if (controls.alignWithAprilTagAndDrive() == false) {
+          if(autoShoot == false) {
             armState = ArmState.TELEOP;
-            armRestStatus = Robot.CONT;
           } 
           else {
-            armState = ArmState.CRAB_SHOOT;
+            armState = ArmState.AUTO_SHOOT;
           }
       }
   }
@@ -683,33 +659,12 @@ public class Robot extends TimedRobot {
 	 * Controls the shooter in TeleOp
 	 */
 	private void shooterControl() {
-    boolean enableShooter     = controls.enableShooter();               // Shoot from against AMP
-    boolean enableAutoShooter = controls.enableAutoShoot();             // Shoot from multiple distances
+    boolean enableShooter     = controls.enableShooter();               // Shoot from against the speaker
     boolean crabShoot         = controls.alignWithAprilTagAndDrive();   // Shoot from multiple distances with auto rotation on target
     boolean startStopShooter  = controls.startShooterWheels();
     int     status;
-    int     enableCount = 0;
 
-
-    // check for errors
-    if (enableShooter == true)  {
-       enableCount++;
-    }
-    if (enableAutoShooter == true)  {
-       enableCount++;
-    }
-    if (crabShoot == true)  {
-       enableCount++;
-    }
-    // special case where crab shoot mode and shooter is enabled
-    if ((crabShoot ==true) && (enableShooter == true) && (enableAutoShooter == false))  {
-       enableCount = 1;
-    }
-    if (enableCount > 1)  {
-       return;  // Too many shooters enabled
-    }
-
-    if (shooterState == ShooterState.OFF)  {
+    if (shooterState == ShooterState.TELEOP)  {
       // Start or stop the shooter wheels, the start button flips the current state
       if(startStopShooter == true) {
         shooterSpinning = !shooterSpinning;
@@ -720,39 +675,41 @@ public class Robot extends TimedRobot {
           shooter.spindown();
         }
       }
+
+      // Checks states
+      if(enableShooter) {
+        shooterState = ShooterState.SPEAKER_SHOOT;
+      }
+      // Crab shoot
+      else if(crabShoot) {
+        shooterState = ShooterState.AUTO_AIM_ROTATE;
+      }
     }
-    // shoot against AMP.  Will complete when releasing button.
+    // shoot against the speaker.  Will complete when releasing button.
     //  Shooter will spin down
-    else if (shooterState == ShooterState.AMP_SHOOT)  {
+    else if (shooterState == ShooterState.SPEAKER_SHOOT)  {
        status = auto.teleopShoot(enableShooter);
 
        if (status == Robot.DONE)  {
-         shooterState = ShooterState.OFF;
+         shooterState = ShooterState.TELEOP;
        }
-       else  {
-         shooterState = ShooterState.AMP_SHOOT;
+       else {
+         shooterState = ShooterState.SPEAKER_SHOOT;
        }
-    }
-    //  Shoot from any distance using april tags for arm rotation
-    else if (shooterState == ShooterState.AUTO_SHOOT)  {
-       status = auto.apriltagShoot(enableAutoShooter);
-       if (status == Robot.DONE)  {
-         shooterState = ShooterState.OFF;
-       }
-       else  {
-         shooterState = ShooterState.AUTO_SHOOT;
-       }
-
     }
     // Shoot from any distance using april tags for arm rotation and
     //  april tags for rotation lock on target
     //  Ring is shot when the manipulator pulls the trigger
+    // Basically is the base point for crab drive
     else if (shooterState == ShooterState.AUTO_AIM_ROTATE)  {
+        // always spin up shooter if getting ready to shoot
+        shooter.spinup();
+
         // armControl will set arm angle
         // driveControl will set robot orientation
         // shoot when manipulator pulls trigger
         if (crabShoot == false)  {
-            shooterState = ShooterState.OFF;
+            shooterState = ShooterState.TELEOP;
         }
         else if (enableShooter == true)  {
             shooterState = ShooterState.AUTO_AIM_ROTATE_SHOOT;
@@ -771,145 +728,40 @@ public class Robot extends TimedRobot {
             shooterState = ShooterState.AUTO_AIM_ROTATE_SHOOT;
         }
     }
-
-/*
-    // Shoot a note
-    if (enableShooter == true) {
-      shooterState = true;
-
-      //if (!crabShoot) {
-      auto.teleopShoot(enableShooter);
-      //}
-    }
-    
-    if(enableAutoShooter == true && enableShooter == false) {
-      autoShooterState = true;
-      auto.apriltagShoot(enableAutoShooter);
-    }
-    
-    // If the drivers have just stopped shooting
-    if (shooterState == true && enableShooter == false) {
-      shooterState = false;
-      auto.resetTeleopShoot();
-      shooter.stopShooting();
-    }
-    else if (autoShooterState == true && enableAutoShooter == false) {
-      autoShooterState = false;
-      auto.resetAutoShoot();
-      shooter.stopShooting();
-    }
-*/
 	}
 
   /**
 	 * Controls the grabber in TeleOp
 	 */
-	private void grabberControl() {
-    boolean ampShoot          = controls.moveToAmpPosition();
+  private void grabberControl() {
     boolean enableShooter     = controls.enableShooter();
-    boolean enableAutoShooter = controls.enableAutoShoot();
+    boolean enableOverride    = controls.overrideIntake();
 
-
-    // Start the grabber in ground mode 
-    if ((enableShooter             == false) && 
-        (enableAutoShooter         == false) &&
-        (ampShoot                  == false) &&
-        (armState                  != ArmState.AMP) &&
-        (controls.overrideIntake() == false))  {
-        grabber.intakeOutake(controls.runIntake(), controls.ejectNote(), false);  
-    }
-
-    if(controls.overrideIntake()) {
-      grabber.setMotorPower(grabber.INTAKE_POWER);      
-    }
-    
-    /*else if (controls.runIntake()){
-      grabber.setMotorPower(grabber.FEED_POWER);
-    }
-    else {
-      grabber.setMotorPower(0);
-    }*/
-	}
-
-  /**
-   * Controls the climber in TeleOp
-   */
-  private void climberControl() {
-    boolean runLeft = controls.runLeftClimber();
-    boolean runRight = controls.runRightClimber();
-
-    if (runLeft && runRight) {      
-      climber.runLeftClimber(climber.PRECISION_CLIMB_POWER);
-      climber.runRightClimber(climber.PRECISION_CLIMB_POWER);
-    }
-    else if(runLeft && runRight == false) {
-      climber.runLeftClimber(climber.PRECISION_CLIMB_POWER); //CLIMB_POWER
-      climber.setRightClimberPower(0);
-    }
-    else if (runLeft == false && runRight){
-      climber.setLeftClimberPower(0);
-      climber.runRightClimber(climber.PRECISION_CLIMB_POWER); //CLIMB_POWER
-    }
-    else {
-      climber.runLeftClimber(0);
-      climber.runRightClimber(0);
-    }
-  }
-
-  /*private void targetSpeakerTag() {
-    double armAngle;  // Angle to rotate to
-
-    // Check if the robot is out of range
-    if(apriltags.outOfRange()) {
-      led.apriltagOutOfRangeColor();
-      led.updateLED();
-      
-      return; // Don't do anything, out of range
-    }
-
-    // Final checks if there's no driver input(robot stop)
-    if(
-      controls.getForwardSpeed() == 0 && 
-      controls.getRotateSpeed() == 0 && 
-      controls.getStrafeSpeed() == 0
-    ) {
-      armAngle = apriltags.calculateArmAngleToShoot(); // Get arm angle
-
-      // Goto and maintain arm shooting angle
-      if(apriltagArmStatus == CONT) {
-        apriltagArmStatus = arm.rotateArm(armAngle);
-      } 
-      else {
-        arm.maintainPosition(armAngle);
+    if(grabberState == GrabberState.TELEOP) {
+      // Check if we're still in this state, override takes priority
+      if(enableOverride) {
+        grabberState = GrabberState.OVERRIDE;
+      }
+      else if(enableShooter) {
+        grabberState = GrabberState.SHOOTER_CONTROL;
       }
 
-      // Face AprilTag(always rotate in case of bumping?)
-      if(apriltagAlignedStatus == CONT) {
-        apriltagAlignedStatus = drive.alignWithAprilTag();  // Rotate to face the tag
+      grabber.intakeOutake(controls.runIntake(), controls.ejectNote(), false);
+    }
+    else if(grabberState == GrabberState.OVERRIDE) {
+      if(enableOverride == false) {
+        grabberState = GrabberState.TELEOP;
       }
 
-      if(apriltagAlignedStatus == DONE && apriltagArmStatus == DONE){
-        led.apriltagReadyToShootColor();
-        led.updateLED();
+      grabber.setMotorPower(grabber.INTAKE_POWER);
+    }
+    else if(grabberState == GrabberState.SHOOTER_CONTROL) {
+      if(enableShooter == false) {
+        grabberState = GrabberState.TELEOP;
+      }
+      else if(enableOverride) {
+        grabberState = GrabberState.OVERRIDE;
       }
     }
-    // Still moving, just rotate arm and set LEDs to orange(in range but moving)
-    else {
-      armAngle = apriltags.calculateArmAngleToShoot(); // Get arm angle
-      apriltagArmStatus = arm.rotateArm(armAngle);     // Rotate arm
-      
-      // Set LEDs to orange
-      led.apriltagInRangeMovingColor();
-      led.updateLED();
-    }
-  }
-*/
-  private void testTeleopDrive() {
-    double rotateSpeed = controls.getRotateSpeed();
-    double strafeSpeed = controls.getStrafeSpeed();
-    double forwardSpeed = controls.getForwardSpeed();
-
-    drive.teleopDrive(forwardSpeed, strafeSpeed, rotateSpeed, false);
-
   }
 }

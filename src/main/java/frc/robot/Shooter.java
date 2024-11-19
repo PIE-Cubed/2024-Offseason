@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.CANSparkFlex;
 
@@ -20,7 +21,6 @@ import com.revrobotics.CANSparkFlex;
     private final int SHOOTER_MOTOR_1_CAN = 5;
     private final int SHOOTER_MOTOR_2_CAN = 6;
     private final int MOTOR_CURRENT_LIMIT = 40;
-    private final double DUMP_SHOT_POWER  = 0.1;
     private final double SHOT_POWER  = .55;   // Competition speed: 1, Demo speed: 0.35
     private final double SHOT_POWER_AMP_TOP = 0.6;
     private final double SHOT_POWER_AMP_BOTTOM = -0.08;
@@ -43,9 +43,6 @@ import com.revrobotics.CANSparkFlex;
 
         // Get the same grabber instance
         instancedGrabber = Grabber.getInstance();
-
-        // Spin the motors
-        //spinup();
     }
 
     /**
@@ -55,7 +52,6 @@ import com.revrobotics.CANSparkFlex;
     public void startShooting(double shootPower) {
         shooterMotor1.set(MathUtil.clamp(shootPower, -1.0, 1.0));
         shooterMotor2.set(MathUtil.clamp(shootPower * .8, -1.0, 1.0));
-        //instancedGrabber.intakeOutake(true, false, false);
         instancedGrabber.setMotorPower(instancedGrabber.FEED_POWER);
     }
 
@@ -99,5 +95,7 @@ import com.revrobotics.CANSparkFlex;
     public void testSpin() {
         shooterMotor2.set(0.05);
     }
-
+    public boolean shooterSpinning() {
+        return shooterMotor1.get() != 0;
+    }
 }

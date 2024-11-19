@@ -21,6 +21,19 @@ public class AprilTags {
     private final int ALL_APRILTAGS_PIPELINE = 2;
     private final int COLOR_PIPELINE = 3;
 
+
+    private final double ANGLE_4_1 = 325;
+    private final double ANGLE_5 = 330;
+    private final double ANGLE_6 = 335;
+    private final double ANGLE_7 = 339;
+    private final double ANGLE_8 = 342;
+    private final double ANGLE_9 = 345;
+    private final double ANGLE_10 = 347;
+    private final double ANGLE_11 = 349;
+    private final double ANGLE_12 = 350.5;
+    private final double ANGLE_13 = 351;
+    private final double ANGLE_14 = 351.25;
+
     public AprilTags(boolean isRed) {
         //System.out.println("[INFO] >> Configuring limelight...");
         // Turn off the limelight LEDs so they don't blind people
@@ -40,42 +53,72 @@ public class AprilTags {
      *         <p> -1 if it fails to get the AprilTag
      */
     public double calculateArmAngleToShoot() {
+        double delta;
+        double angle;
+
+
         //double distance = getDistanceToSpeakerFeet() * 30.48;
         //double angle = (CUBED_CONST * Math.pow(distance, 3)) - (SQUARED_CONST * Math.pow(distance, 2)) + (SINGLE_CONST * distance) + OFFSET;
         double distance = getDistanceToSpeakerFeet();
         if(distance == -1) {
-            System.out.println("ERROR: Unable to get AprilTag");
+            System.err.println("ERROR: Unable to get AprilTag");
             return -1;
-        } else {
-          //  System.out.println("Distance to AprilTag " + distance + "ft");
-        }
-        double angle = (-0.0139 * Math.pow(distance, 3)) + (0.1651 * Math.pow(distance, 2)) + (3.8277 * distance) + 315.39;
-        
-        if(angle >= 360) {
-            angle -= 360;
         }
 
-        // If the distance is >= 8 feet, subtract 1.5 degrees
-        // for every foot past the 8 feet
-        //if (distance >= 243.84) { // 8 feet
-        //    angle -= Math.abs(1.51 * ((distance / 30.48) - 8));
-        //    angle = Math.abs(angle);
-        //}
-        if(angle <= 330 && angle >= 5) {
-        //    System.out.println("Angle(" + angle + ") out of range (5-330deg)! Using 339");
-            angle = 339;
+        /* 5.46 feet @ 325 degrees */
+        if ((distance >= 4.1)  &&  (distance < 5.0))  {
+            delta = distance - 4.1;
+            angle = (delta * (ANGLE_5 - ANGLE_4_1)) + ANGLE_4_1;
         }
-        //System.out.println(distance);
-
-        // TODO Fix the actual angle function as this is temporary
-        if(distance > 9.0 && distance < 9.4) {
-        //    System.out.println("Setting shooter angle to 340");
-            angle = 340;
-        } else if(distance > 9.6 && distance < 10.4){
-        //
-            System.out.println("Setting shooter angle to 343");
-            angle = 343;
+        /* 5.46 feet @ 325 degrees */
+        else if ((distance >= 5)  &&  (distance < 6.0))  {
+            delta = distance - 5;
+            angle = (delta * (ANGLE_6 - ANGLE_5)) + ANGLE_5;
         }
+        /* 6 feet @ 330 degrees */
+        else if ((distance >= 6.0)  &&  (distance < 7.0))  {
+            delta = distance - 6;
+            angle = (delta * (ANGLE_7 - ANGLE_6)) + ANGLE_6;
+        }
+        /* 7 feet @ 333 degrees */
+        else if ((distance >= 7.0)  &&  (distance < 8.0))  {
+            delta = distance - 7;
+            angle = (delta * (ANGLE_8 - ANGLE_7)) + ANGLE_7;
+        }
+        /* 8 feet @ 338 degrees */
+        else if ((distance >= 8.0)  &&  (distance < 9.0))  {
+            delta = distance - 8;
+            angle = (delta * (ANGLE_9 - ANGLE_8)) + ANGLE_8;
+        }
+        /* 9 feet @ 343.5 degrees */
+        else if ((distance >= 9.0)  &&  (distance < 10.0))  {
+            delta = distance - 9;
+            angle = (delta * (ANGLE_10 - ANGLE_9)) + ANGLE_9;
+        }
+        /* 10 feet @ 345 degrees */
+        else if ((distance >= 10.0)  &&  (distance < 11.0))  {
+            delta = distance - 10;
+            angle = (delta * (ANGLE_11 - ANGLE_10)) + ANGLE_10;
+        }
+        /* 11 feet @ 347.5 degrees */
+        else if ((distance >= 11.0)  &&  (distance < 12.0))  {
+            delta = distance - 11;
+            angle = (delta * (ANGLE_12 - ANGLE_11)) + ANGLE_11;
+        }
+        /* 12 feet @ 349.5 degrees */
+        else if ((distance >= 12.0)  &&  (distance < 13.0))  {
+            delta = distance - 12;
+            angle = (delta * (ANGLE_13 - ANGLE_12)) + ANGLE_12;
+        }
+        /* 12 feet @ 349.5 degrees */
+        else if ((distance >= 13.0)  &&  (distance < 14.0))  {
+            delta = distance - 13;
+            angle = (delta * (ANGLE_14 - ANGLE_13)) + ANGLE_13;
+        }
+        else  {
+            angle = 325;   // rest angle
+        }
+        /* 13 feet @ 351 degrees */
 
         return angle;
     }

@@ -4,24 +4,12 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.Angle;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Units;
-import frc.robot.Robot.ArmState;
-
 public class Auto {
     // State tracking variables - each variable can only be used in one function at any time
     // All top level routines use firstTime and step, all helper routines have their own variables
     private int step;
-    private int restStep;
-    private int intakeStep;
     private boolean firstTime = true;
-    private boolean restFirstTime = true;
-    private boolean intakeFirstTime = true;
     private boolean teleopShootFirstTime = true;
-    private boolean teleopShootAmpFirstTime = true;
     private boolean autoShootFirstTime = true;
     public boolean isRed = false;
     public int allianceAngleModifier = 1;
@@ -32,13 +20,9 @@ public class Auto {
     
     private int intakeStatus = Robot.CONT;
     private int driveStatus = Robot.CONT;
-    private int armStatus = Robot.CONT;
     private int status = Robot.CONT;
     
-   // private final double SHOOT1_ANGLE = 339;   // Up against speaker
-    private final double SHOOT1_ANGLE = 327;   // Up against speaker
-    //private final int SHOOT1_ANGLE = 349;   // Edge of safe zone
-    private final double SHOOT2_ANGLE = 339;
+    private final double SHOOT1_ANGLE = 325;   // Up against speaker
     
     private double apriltagShootAngle = SHOOT1_ANGLE;   // Start at against the speaker
 
@@ -71,201 +55,13 @@ public class Auto {
 
     /****************************************************************************************** 
      * 
-     *    DRIVE FUNCTIONS
-     * 
-     ******************************************************************************************/    
-
-    /**
-     * Shoot the trap? need to confirm
-     * 
-     * @return Robot status, CONT or DONE
-     */
-    public int trapSequence() { return Robot.CONT; }
-
-    /****************************************************************************************** 
-     * 
      *    MANIPULATOR FUNCTIONS
      * 
      ******************************************************************************************/
-    
-    /**
-     * <p>Moves the arm back into position to pick up a note from the ground
-     * <p> -33.5 degrees from horizontal
-     * <p> 5inch extension of the arm
-     * <p> First rotates, then extends the arm
-     * @return Robot status, CONT or DONE
-     */
-    public int groundPickupPosition() {
-        int status = Robot.CONT;
-
-        if(firstTime == true) {
-            firstTime = false;
-            step = 1;
-        }
-
-        switch(step) {
-            // Rotate arm to -33.5 degrees from horizontal
-            case 1:
-                status = arm.rotateArm(Math.toDegrees(-33.5));
-                break;
-
-            // Extend arm to 5in(current function takes encoder rotations right now)
-            case 2:
-                //status = arm.extendArm(1, 0.1);  // TODO get actual distance
-                status = Robot.DONE;
-                break;
-
-            // Finished routine, reset variables and return done
-            default:
-                step = 1;
-                firstTime = true;
-                return Robot.DONE;
-        }
-
-        // Done current step, go to next one
-        if(status == Robot.DONE) {
-            step++;
-        }
-
-        return Robot.CONT;
-    }
 
     /**
-     * <p> Moves the arm back into resting position
-     * <p> Retracts first, then rotates to keep hard-stops within bumper
-     * @return Robot status, CONT or DONE
-     */
-    public int restingPosition() {
-        int status = Robot.CONT;
-
-        if(restFirstTime == true) {
-            restFirstTime = false;
-            restStep = 1;
-        }
-
-        switch(restStep) {
-            // Retract to make sure hard-stops are within bumpers
-            case 1:
-                //System.out.println("Retract to rest");
-                //status = arm.extendToRest();
-                status = Robot.DONE;
-                break;
-
-            // Rotate to rest while continually retracting
-            case 2:
-                //System.out.println("Rotate to rest");
-                status = arm.rotateToRest(1.5);
-                //arm.extendToRest(); // Keep retracting just in case it accidentally extends
-                break;
-            default:    // Finished routine, reset variables and return done
-                restStep = 1;
-                restFirstTime = true;
-                return Robot.DONE;
-        }
-
-        // Done current step, goto next one
-        if(status == Robot.DONE) {
-            restStep++;
-        }
-
-        return Robot.CONT;
-    }
-
-    /**
-     * <p> Moves the arm into intake position
-     * <p> Goes to rest, then extends arm
-     * @return Robot status, CONT or DONE
-     */
-    public int intakePosition() {
-        int status = Robot.CONT;
-
-        if(intakeFirstTime == true) {
-            intakeFirstTime = false;
-            intakeStep = 1;
-        }
-
-        switch(intakeStep) {
-            // Retract to make sure hard-stops are within bumpers
-            case 1:
-                status = restingPosition();
-                break;
-
-            // Rotate to rest while continually retracting
-            case 2:
-                //status = arm.extendToIntake();
-                status = Robot.DONE;
-                break;
-            default:    // Finished routine, reset variables and return done
-                intakeStep = 1;
-                intakeFirstTime = true;
-                return Robot.DONE;
-        }
-
-        // Done current step, goto next one
-        if(status == Robot.DONE) {
-            intakeStep++;
-        }
-
-        return Robot.CONT;
-    }
-
-    /**
-     * <p> Moves the arm so the shooter is aiming at the speaker (located in the center position)
-     * <p> -26 degrees from horizontal
-     * <p> Fully retracts arm
-     * <p> First rotates, then retracts the arm
-     * <p> This currently takes 11 seconds for a full auto cycle
-     * @return Robot status, CONT or DONE
-     */
-    public int extensionTest() {
-        if(firstTime == true) {
-            firstTime = false;
-            intakeStatus = Robot.CONT;
-            driveStatus = Robot.CONT;
-            step = 1;
-        }
-
-        switch(step) {
-            // Extend the arm so the wood holding block falls into the robot
-            case 1:
-            //System.out.println("RETRACT");
-            //System.out.println("Arm extension position: " + arm.getExtendPosition());
-                //status = arm.extendArm(23, 0.25);
-                status = Robot.DONE;
-                break;
-
-            // Extend the arm so the wood holding block falls into the robot
-            case 2:
-            //System.out.println("EXTEND");
-            //System.out.println("Arm extension position: " + arm.getExtendPosition());
-                //status = arm.extendArm(-23, -0.25);
-                status = Robot.DONE;
-                break;
-                
-            // Finished routine, reset variables, stop motors, and return done
-            default:
-            System.out.println("DONE");
-                shooter.stopShooting();
-                grabber.intakeOutake(false, false, false);
-                step = 1;
-                firstTime = true;
-                return Robot.DONE;
-        }
-
-        // Done current step, goto next one
-        if(status == Robot.DONE) {
-            step++;
-        }
-
-        return Robot.CONT;
-    }
-
-    /**
-     * <p> Moves the arm so the shooter is aiming at the speaker (located in the center position)
-     * <p> -26 degrees from horizontal
-     * <p> Fully retracts arm
-     * <p> First rotates, then retracts the arm
-     * <p> This currently takes 11 seconds for a full auto cycle
+     * <p> Shoots into the speaker
+     * <p> Moves back to get a note, drives back, then shoots against the speaker
      * @return Robot status, CONT or DONE
      */
     public int speakerPositionCenterNoAprilTags() {
@@ -341,13 +137,13 @@ public class Auto {
 
             // Rotate the arm so it's in the shooting position
             case 9:
-                status = arm.rotateArm(SHOOT2_ANGLE);    
+                status = arm.rotateArm(SHOOT1_ANGLE);    
                 break;
 
             // Shoot the note
             case 10:
                 grabber.setMotorPower(grabber.INTAKE_POWER);
-                arm.maintainPosition(SHOOT2_ANGLE);
+                arm.maintainPosition(SHOOT1_ANGLE);
                 status = autoDelay(1);
                 break;
             
@@ -369,11 +165,8 @@ public class Auto {
     }
 
     /**
-     * <p> Moves the arm so the shooter is aiming at the speaker (located in the center position)
-     * <p> -26 degrees from horizontal
-     * <p> Fully retracts arm
-     * <p> First rotates, then retracts the arm
-     * <p> This currently takes 11 seconds for a full auto cycle
+     * <p> Shoots into the speaker
+     * <p> Moves back to get a note and shoot with AprilTags
      * @return Robot status, CONT or DONE
      */
     public int speakerPositionCenter() {
@@ -420,8 +213,6 @@ public class Auto {
 
             // Drive backwards 4 1/2 feet
             case 6:
-                //arm.maintainPosition(arm.ARM_REST_POSITION_DEGREES);
-
                 if (intakeStatus == Robot.CONT) {
                     intakeStatus = grabber.intakeOutake(true, false, true);
                 }
@@ -445,8 +236,12 @@ public class Auto {
             case 7:
                 apriltagShootAngle = apriltags.calculateArmAngleToShoot();
                 if(apriltagShootAngle == -1){
+                    apriltagShootAngle = 341.5; // Just in case, go to 341.5
                     System.out.println("Can't see valid AprilTag");
+                } else {
+                    System.out.println("Saw a tag but ignoring it and using a fixed position");
                 }
+               // apriltagShootAngle = 341.5;
                 System.out.println("Shooting at " + apriltagShootAngle + "deg");
                 
                 status = arm.rotateArm(apriltagShootAngle);
@@ -484,11 +279,8 @@ public class Auto {
     }
 
     /**
-     * <p> Moves the arm so the shooter is aiming at the speaker (located in the right position)
-     * <p> -26 degrees from horizontal
-     * <p> Fully retracts arm
-     * <p> First rotates, then retracts the arm
-     * <p> This currently takes 11 seconds for a full auto cycle
+     * <p> Shoots into the speaker
+     * <p> Drives back, rotates, drives and gets note, then shoots with AprilTags
      * @return Robot status, CONT or DONE
      */
     public int speakerPositionAmp() {
@@ -509,64 +301,41 @@ public class Auto {
                 shooter.spinup();
                 status = drive.rotateWheelsToAngle(0);
                 break;
-                
-            // Retract the arm to shoot distance(rest)
-            case 2:
-                //status = arm.extendToRest();
-                status = Robot.DONE;
-                break;
             
-            case 3:
+            case 2:
                 status = arm.rotateArm(SHOOT1_ANGLE);
                 break;
     
             // Shoot the note by running the grabber
-            case 4:
+            case 3:
                 grabber.setMotorPower(grabber.INTAKE_POWER);
                 arm.maintainPosition(SHOOT1_ANGLE);
                 status = Robot.DONE;
                 break;
 
             // Assume the robot shot the note after 0.75 second(s)
-            case 5:
+            case 4:
                 status = autoDelayMS(750);
                 arm.maintainPosition(SHOOT1_ANGLE);
                 break;
 
             // Rotate the arm to its resting position, and turn off the shooter & grabber
-            case 6:            
+            case 5:            
                 grabber.intakeOutake(false, false, true);
-                status = Robot.DONE;
-                            
+                status = Robot.DONE;       
                 break;
 
-            // Rotate the robot 57 degrees
-            // Currently overturning at 57
-            case 7:
+            case 6:
                 status = drive.driveDistanceWithAngle(0, 1.4, 0.5);
-                
-                //armStatus = arm.extendToRest();
-
-                //if(driveStatus == Robot.DONE && armStatus == Robot.DONE) {
-                //    driveStatus = Robot.CONT;
-                //    armStatus = Robot.CONT;
-                //    status = Robot.DONE;
-                //} 
-                //else {
-                //    status = Robot.CONT;
-                //}
                 break;
 
+            case 7:
+                status = drive.rotateRobot(Math.toRadians(allianceAngleModifier * 50));
+                break;
+                
+            // Rotate the wheels back to zero before driving forward
             case 8:
-                status = drive.rotateRobot(Math.toRadians(allianceAngleModifier * 47));
-                //status = arm.rotateToRest(1.15);
-                break;
-                
-                // Rotate the wheels back to zero before driving forward
-            case 9:
                 driveStatus = drive.rotateWheelsToAngle(0);            
-                grabber.intakeOutake(true, false, true);
-                //armStatus = arm.extendToIntake();
 
                 if(driveStatus == Robot.DONE) {
                     driveStatus = Robot.CONT;
@@ -578,7 +347,7 @@ public class Auto {
                 break;
 
             // Drive forwards 4.5 feet and pick up a note
-            case 10:
+            case 9:
                 if (intakeStatus == Robot.CONT) {
                     intakeStatus = grabber.intakeOutake(true, false, true);
                 }
@@ -599,34 +368,35 @@ public class Auto {
                 break;
 
             // Align with the speaker to shoot
-            case 11:
+            case 10:
                 status = drive.alignWithAprilTag();
                 break;
 
-            // Retract arm to prepare for shooting
-            case 12:
-                //arm.maintainPosition(SHOOT1_ANGLE);
-                //status = drive.driveDistanceWithAngle(0, -5.3, 0.5);
-                //shooter.spinup();
-                //status = arm.extendToRest();
-                status = restingPosition();
+            // Rotate to rest
+            case 11:
+                status = arm.rotateToRest(1.5);
                 break;
 
             // Raise arm to shooting angle
-            case 13:
+            case 12:
                 //April tag distance is 9.49 FT, low by 1-2 degrees
                 apriltagShootAngle = apriltags.calculateArmAngleToShoot();
+
+                if(apriltagShootAngle == -1) {
+                    apriltagShootAngle = 343;
+                    System.out.println("Cannot see AprilTag, shooting at 331.5");
+                }
+
                 status = arm.rotateArm(apriltagShootAngle);
-                //System.out.println(apriltagShootAngle);
                 break;
 
-            case 14:
+            case 13:
                 arm.maintainPosition(apriltagShootAngle);
                 status = autoDelayMS(1000);
                 break;
             
             // Start the grabber and keep the arm in shooting position
-            case 15:
+            case 14:
                 grabber.setMotorPower(grabber.INTAKE_POWER);
                 arm.maintainPosition(apriltagShootAngle);
                 status = autoDelayMS(500);
@@ -765,11 +535,7 @@ public class Auto {
     }
 
     /**
-     * <p> Moves the arm so the shooter is aiming at the speaker (located in the center position)
-     * <p> -26 degrees from horizontal
-     * <p> Fully retracts arm
-     * <p> First rotates, then retracts the arm
-     * <p> This currently takes 11 seconds for a full auto cycle
+     * <p> Shoot into the speaker and stop
      * @return Robot status, CONT or DONE
      */
     public int speakerShootWithoutMoving() {
@@ -815,6 +581,11 @@ public class Auto {
         return Robot.CONT;
     }
 
+    /**
+     * <p> Shoot into the speaker
+     * <p> Drive out and back into alliance safe zone for points
+     * @return Robot status, CONT or DONE
+     */
     public int speakerShootMoveOut() {
         if(firstTime == true) {
             firstTime = false;
@@ -874,15 +645,12 @@ public class Auto {
     }
 
     /**
-     * <p> Moves the arm so the shooter is aiming at the speaker
-     * <p> -27 degrees from horizontal
-     * <p> Fully retracts arm
-     * <p> First rotates, then retracts the arm
+     * <p> Shoot a note from against the speaker
+     * <p> Release right trigger to stop shooting
+     * @param shooterEnable Whether to continue shooting or not
      * @return Robot status, CONT or DONE
      */
     public int teleopShoot(boolean shooterEnable) {
-        //int intakeStatus = Robot.CONT;
-        //int driveStatus = Robot.CONT;
         int status = Robot.CONT;
 
         if(teleopShootFirstTime == true) {
@@ -933,66 +701,8 @@ public class Auto {
     }
 
     /**
-     * <p> Moves the arm so the shooter is aiming at the speaker
-     * @return Robot status, CONT or DONE
-     */
-    public int teleopShootAmp(boolean shooterEnable) {
-        //int intakeStatus = Robot.CONT;
-        //int driveStatus = Robot.CONT;
-        int status = Robot.CONT;
-
-        if(teleopShootAmpFirstTime == true) {
-            teleopShootAmpFirstTime = false;
-            step = 1;
-        }
-
-        switch(step) {            
-            // Start the shooter motors and rotate the arm to -23 (336) degrees from 54
-            case 1:
-                shooter.spinupAmp();
-                status = arm.rotateArm(SHOOT1_ANGLE);
-                break;
-
-            case 2:
-                status = autoDelayMS(1250);
-                arm.maintainPosition(SHOOT1_ANGLE);
-                break;
-            
-            // Start the grabber and keep the arm in shooting position
-            case 3:
-                grabber.setMotorPower(grabber.INTAKE_POWER);
-                arm.maintainPosition(SHOOT1_ANGLE);
-                
-                if(shooterEnable) {
-                    status = Robot.CONT;
-                }
-                else {
-                    status = Robot.DONE;
-                }
-                break;
-            
-            default:
-                shooter.spindown();
-                teleopShootAmpFirstTime = true;
-                grabber.intakeOutake(false, false, false);
-                arm.disableRotation();
-                step = 1;
-                return Robot.DONE;
-        }
-
-        // Done current step, goto next one
-        if(status == Robot.DONE) {
-            step++;
-        }
-
-        return Robot.CONT;
-    }
-
-    /**
-     * <p> Moves the arm so the shooter is aiming at the speaker
-     * <p> -27 degrees from horizontal
-     * <p> Fully retracts arm
-     * <p> First rotates, then retracts the arm
+     * <p> Rotates the robot and elevates the arm so that they face the speaker
+     * <p> Allows the driver to continue to drive
      * @return Robot status, CONT or DONE
      */
     public int teleopShootCrabDrive(boolean shooterEnable) {
@@ -1042,10 +752,7 @@ public class Auto {
     }
 
     /**
-     * <p> Moves the arm so the shooter is aiming at the speaker
-     * <p> -27 degrees from horizontal
-     * <p> Fully retracts arm
-     * <p> First rotates, then retracts the arm
+     * <p> Automatically elevates the arm so the shooter is aiming at the speaker
      * @return Robot status, CONT or DONE
      */
     public int apriltagShoot(boolean shooterEnable) {
@@ -1086,7 +793,7 @@ public class Auto {
                 break;
             
             case 4:
-                status = restingPosition();
+                status = arm.rotateToRest(1.5);
                 break;
 
             default:
@@ -1119,121 +826,6 @@ public class Auto {
     public void resetAutoShoot() {
         autoShootFirstTime = true;
     }
-
-    /**
-     * Moves the arm into the position and shoot into the amp
-     */
-    public int ampPosition() {
-        int status = Robot.CONT;
-
-        if(firstTime == true) {
-            firstTime = false;
-            step = 1;
-        }
-
-        switch(step) {
-            case 1:     // Rotate arm to 135deg
-                status = arm.rotateArm(135);
-                break;
-            case 2:     // Slowly go to 145deg
-                status = autoDelay(1);
-                arm.maintainPosition(145);
-                break;
-            case 3:     // Outtake the note into the amp for 1/2second
-                arm.maintainPosition(145);
-                grabber.setMotorPower(grabber.OUTTAKE_POWER);
-                status = autoDelayMS(500);
-                break;
-            case 4:     // Rotate to 85 so the arm won't go the other way on its way to rest
-                status = arm.rotateArm(85);
-                break;
-            case 5:     // Go back to rest(shoot angle)
-                status = arm.rotateArm(SHOOT1_ANGLE);
-                break;
-            default:
-                grabber.setMotorPower(0);
-                step = 1;
-                firstTime = true;
-                return Robot.DONE;
-        }
-
-        // Done current step, goto next one
-        if(status == Robot.DONE) {
-            step++;
-        }
-
-        return Robot.CONT;
-    }
-
-    /**
-     * <p> Moves the arm to its starting position
-     * <p> 54 degrees from horizontal
-     * <p> Fully retracts arm
-     * <p> First rotates, then extends the arm
-     * @return Robot status, CONT or DONE
-     */
-    public int startingPosition() {
-        int status = Robot.CONT;
-
-        if(firstTime == true) {
-            firstTime = false;
-            step = 1;
-        }
-
-        switch(step) {
-            case 1:     // Rotate arm to position (54 degrees)
-                status = arm.rotateArm(54);
-                break;
-            case 2:     // Fully retract arm(need to confirm with austin)
-                break;
-            default:    // Finished routine, reset variables and return done
-                step = 1;
-                firstTime = true;
-                return Robot.DONE;
-        }
-
-        // Done current step, goto next one
-        if(status == Robot.DONE) {
-            step++;
-        }
-
-        return Robot.CONT;
-    }
-
-    /**
-     * Sets up and moves the arm to climb the chain
-     * 
-     * @return Robot.CONT or Robot.DONE
-     */
-    public int autoClimb() {
-        int status = Robot.CONT;
-
-        if(firstTime == true) {
-            firstTime = false;
-            step = 1;
-        }
-
-        switch(step) {
-            case 1:     // Rotate arm to 90 degrees
-                break;
-            case 2:     // Extend arm to mount chain
-                break;
-            case 3:     // Retract arm fully to climb 
-                break;
-            default:    // Finished routine, reset variables and return done
-                step = 1;
-                firstTime = true;
-                return Robot.DONE;
-        }
-
-        // Done current step, goto next one
-        if(status == Robot.DONE) {
-            step++;
-        }
-
-        return Robot.CONT;
-    }
-
 
     /****************************************************************************************** 
      *
@@ -1289,15 +881,10 @@ public class Auto {
     * 
     ******************************************************************************************/    
     /**
-     * <p> Moves the arm so the shooter is aiming at the speaker
-     * <p> -27 degrees from horizontal
-     * <p> Fully retracts arm
-     * <p> First rotates, then retracts the arm
+     * <p> Shoots a note at the given angle
      * @return Robot status, CONT or DONE
      */
     public int testShoot(double angle) {
-        //int intakeStatus = Robot.CONT;
-        //int driveStatus = Robot.CONT;
         int status = Robot.CONT;
 
         if(teleopShootFirstTime == true) {

@@ -16,6 +16,10 @@ public class LED {
     private double GREEN = 0.77;            // Green
     private double ORANGE = 0.65;           // Orange
     private double RED = 0.61;              // Red
+    private double PURPLE = 0.91;
+    private double BLUE = 0.87;
+    private double WHITE = 0.93;
+    
     
     private double oldColor;
     private double setColor = TEAM_COLORS;
@@ -63,8 +67,8 @@ public class LED {
     /**
      * Sets the LEDs to orange
      */
-    public void apriltagInRangeMovingColor() {
-        setColor = ORANGE;
+    public void shooterSpinningColor() {
+        setColor = WHITE;
     }
 
     /**
@@ -79,6 +83,10 @@ public class LED {
      */
     public void partyColor() {
         setColor = PARTY_COLORS;
+    }
+
+    public void autoAim() {
+        setColor = RED;
     }
 
 }
