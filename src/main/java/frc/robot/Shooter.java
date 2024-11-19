@@ -33,7 +33,7 @@ import com.revrobotics.CANSparkFlex;
         shooterMotor1 = new CANSparkFlex(SHOOTER_MOTOR_1_CAN, MotorType.kBrushless);
         shooterMotor1.setSmartCurrentLimit(MOTOR_CURRENT_LIMIT);
         shooterMotor1.setIdleMode(IdleMode.kCoast);
-        shooterMotor1.setInverted(false);
+        shooterMotor1.setInverted(true);
 
         
         shooterMotor2 = new CANSparkFlex(SHOOTER_MOTOR_2_CAN, MotorType.kBrushless);
