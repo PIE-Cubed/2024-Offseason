@@ -122,7 +122,7 @@ public class Robot extends TimedRobot {
 
     // Start the camera server
     //System.out.println("[INFO] >> Starting camera server...");
-    //CameraServer.startAutomaticCapture();
+    CameraServer.startAutomaticCapture();
     
     // Auto selection
     //System.out.println("[INFO] >> Configuring auto...");
@@ -574,7 +574,7 @@ public class Robot extends TimedRobot {
   private void climberControl() {
     double  leftClimber           = controls.leftClimber();
     double  rightClimber          = controls.rightClimber();
-    double power                  = 0.5;
+    double power                  = 0.1;
 
     if (leftClimber >= 0.5) {
       climber.runLeftClimberForwards(power);

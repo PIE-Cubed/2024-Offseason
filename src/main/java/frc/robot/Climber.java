@@ -42,7 +42,7 @@ public class Climber {
      */
     public void runRightClimberForwards(double power) {
 
-        rightMotor.set(power);
+        rightMotor.set(-power);
     }
     /*
      * Stops left climber
