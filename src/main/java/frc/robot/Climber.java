@@ -27,26 +27,22 @@ public class Climber {
     /**
      * Runs the left climber motor forwards
      */
-    public void runLeftClimberForwards(Boolean on, double power) {
-        if (on == true) {
-            leftMotor.set(power);
-        }
+    public void runLeftClimberForwards(double power) {
+        leftMotor.set(power);
     }
     /**
      * Runs the left climber motor backwards
      */
-    public void runLeftClimberBackwards(Boolean on, double power) {
-        if (on == true) {
-            leftMotor.set(-power);
-        }
+    public void runLeftClimberBackwards(double power) {
+
+        leftMotor.set(-power);
     }
     /**
      * Runs the right climber motor forwards
      */
-    public void runRightClimberForwards(Boolean on, double power) {
-        if (on == true) {
-            rightMotor.set(power);
-        }
+    public void runRightClimberForwards(double power) {
+
+        rightMotor.set(power);
     }
     /*
      * Stops left climber
@@ -57,10 +53,8 @@ public class Climber {
     /**
      * Runs the right climber motor backwards
      */
-    public void runRightClimberBackwards(Boolean on, double power) {
-        if (on == true) {
-            rightMotor.set(power);
-        }
+    public void runRightClimberBackwards(double power) {
+        rightMotor.set(power);
     }
     /*
      * Stops left climber

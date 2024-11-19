@@ -341,37 +341,20 @@ public class Controls {
 
 	//Climbers
 	/*
-	 * Pressing the left joystick up will move the left Climber forwards
+	 * Pressing the left joystick will move the left Climber
 	 * @return Manipulator controller Left Joystick 
 	 */
-	public boolean leftClimberForwards() {
-		return manipulatorController.getLeftTriggerAxis() > 0.5;
+	public double leftClimber() {
+		return -manipulatorController.getLeftY();
 	}
-
 	/*
-	 * Pressing the left joystick down will move the left Climber backwards
-	 * @return Manipulator controller Left Joystick 
-	 */
-	public boolean leftClimberBackwards() {
-		return manipulatorController.getLeftTriggerAxis() < -0.5;
-	}
-
-	/*
-	 * Pressing the right joystick will move the right Climber forwards
+	 * Pressing the right joystick will move the right Climber
 	 * @return Manipulator controller Right Joystick 
 	 */
-	public boolean rightClimberForwards() {
-		return manipulatorController.getRightTriggerAxis() > 0.5;
+	public double rightClimber() {
+		return -manipulatorController.getRightY();
 	}
-
-	/*
-	 * Pressing the left joystick will move the left Climber forwards
-	 * @return Manipulator controller Left Joystick 
-	 */
-	public boolean rightClimberBackwards() {
-		return manipulatorController.getRightTriggerAxis() < -0.5;
-	}
-
+	
 	/****************************************************************************************** 
     *
     *    MISC FUNCTIONS
