@@ -49,17 +49,20 @@ public class AprilTags {
     /**
      * <p> Calculate the angle the arm needs to be at to get into the speaker
      * <p> Currently only uses apriltag 7
+     * @param odometryDistance Set to -1 to just use AprilTags
      * @return The elevation of the arm to shoot into the speaker
      *         <p> -1 if it fails to get the AprilTag
      */
-    public double calculateArmAngleToShoot() {
+    public double calculateArmAngleToShoot(double odometryDistance) {
         double delta;
         double angle;
 
 
         //double distance = getDistanceToSpeakerFeet() * 30.48;
         //double angle = (CUBED_CONST * Math.pow(distance, 3)) - (SQUARED_CONST * Math.pow(distance, 2)) + (SINGLE_CONST * distance) + OFFSET;
-        double distance = getDistanceToSpeakerFeet();
+        
+        // Use AprilTags when 'odometryDistance' is -1, else use 'odometryDistance'
+        double distance = (odometryDistance == -1) ? getDistanceToSpeakerFeet() : odometryDistance;
         if(distance == -1) {
             System.err.println("ERROR: Unable to get AprilTag");
             return -1;

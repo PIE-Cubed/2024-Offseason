@@ -634,7 +634,9 @@ public class Robot extends TimedRobot {
           }
       }
       else if(armState == ArmState.AUTO_SHOOT) {
-          double shootAngle = apriltags.calculateArmAngleToShoot();
+          double shootAngle = apriltags.calculateArmAngleToShoot(
+            position.distanceToSpeaker(nTables.getIsRedAlliance())  // FIXME TEST THIS
+          );
 
           if(shootAngle < 0) {
             System.err.println("ERROR: Bad AprilTag angle. Negative value: " + shootAngle);

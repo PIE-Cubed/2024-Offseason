@@ -1,10 +1,12 @@
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N3;
@@ -121,6 +123,29 @@ public class Odometry {
             currentPosition, 
             newPose
         );
+    }
+
+    /**
+     * <p> Returns the distance to the speaker (feet)
+     * @param isRed If the robot is on the red alliance
+     * @return The distance to the speaker
+     */
+    public double distanceToSpeaker(boolean isRed) {
+        Pose2d poseMeters = aprilTagsEstimator.getEstimatedPosition();
+
+        // Conver current pose to feet instead of meters
+        Pose2d poseFeet = new Pose2d(poseMeters.getX() * 3.28084, poseMeters.getY() * 3.28084, poseMeters.getRotation());
+
+        /* (0,0) is always next to the red alliance note feed
+         * Where X+ is towards the red side
+         * Where Y+ is towards the amp (either side)
+         * From field docs, speaker-center AprilTag positions, divide by 12 to get feet */
+        final Translation2d BLUE_SPEAKER_POSE = new Translation2d(-1.50 / 12, 218.42 / 12);
+        final Translation2d RED_SPEAKER_POSE = new Translation2d(652.73 / 12, 218.42 / 12);
+
+        Translation2d speaker = (isRed) ? RED_SPEAKER_POSE : BLUE_SPEAKER_POSE;
+        
+        return poseFeet.getTranslation().getDistance(speaker);
     }
 
     /*******************************************************************************************

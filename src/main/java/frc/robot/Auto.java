@@ -234,7 +234,7 @@ public class Auto {
                 break;
 
             case 7:
-                apriltagShootAngle = apriltags.calculateArmAngleToShoot();
+                apriltagShootAngle = apriltags.calculateArmAngleToShoot(position.distanceToSpeaker(isRed)); // FIXME TEST THIS
                 if(apriltagShootAngle == -1){
                     apriltagShootAngle = 341.5; // Just in case, go to 341.5
                     System.out.println("Can't see valid AprilTag");
@@ -380,7 +380,7 @@ public class Auto {
             // Raise arm to shooting angle
             case 12:
                 //April tag distance is 9.49 FT, low by 1-2 degrees
-                apriltagShootAngle = apriltags.calculateArmAngleToShoot();
+                apriltagShootAngle = apriltags.calculateArmAngleToShoot(position.distanceToSpeaker(isRed)); // FIXME TEST THIS
 
                 if(apriltagShootAngle == -1) {
                     apriltagShootAngle = 343;
@@ -768,7 +768,7 @@ public class Auto {
             // Start the shooter motors and rotate the arm to -23 (336) degrees from 54
             case 1:
                 shooter.spinup();
-                apriltagShootAngle = apriltags.calculateArmAngleToShoot();
+                apriltagShootAngle = apriltags.calculateArmAngleToShoot(position.distanceToSpeaker(isRed)); // FIXME TEST THIS
                 //System.out.println(apriltagShootAngle);
                 status = arm.rotateArm(apriltagShootAngle);
                 break;
