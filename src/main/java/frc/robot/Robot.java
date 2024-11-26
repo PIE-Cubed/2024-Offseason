@@ -36,6 +36,7 @@ public class Robot extends TimedRobot {
 	Auto                 auto;
   Arm                  arm;
   LED                  led;
+  Climber              climber;
 
 	// Variables
 	private int status = CONT;
@@ -56,6 +57,7 @@ public class Robot extends TimedRobot {
   private int armStatus         = CONT;
   private int armRotateStatus   = CONT;
   private int restingStatus     = CONT;
+  private int climberStatus     = CONT;
   
   // Statuses for AprilTag targeting
   private int apriltagArmStatus     = CONT;
@@ -107,6 +109,7 @@ public class Robot extends TimedRobot {
     arm       = new Arm();
 		auto      = new Auto(drive, position, arm, grabber, shooter, apriltags);
     led       = new LED();
+    climber   = new Climber();
   }
 
   /**
@@ -119,7 +122,7 @@ public class Robot extends TimedRobot {
 
     // Start the camera server
     //System.out.println("[INFO] >> Starting camera server...");
-    //CameraServer.startAutomaticCapture();
+    CameraServer.startAutomaticCapture();
     
     // Auto selection
     //System.out.println("[INFO] >> Configuring auto...");
@@ -265,6 +268,9 @@ public class Robot extends TimedRobot {
     
     // Allows for controlling the LEDs
     ledControl();
+
+    // Allows for controlling the Climber
+    climberControl();
     
     // Drivers check this to see if they grabbed a note
     SmartDashboard.putBoolean("Grabber has Note", grabber.noteDetected());
@@ -560,6 +566,37 @@ public class Robot extends TimedRobot {
     
     led.updateLED();  // Update LEDs
 
+  }
+
+  /*
+   * Controls the Climber in TeleOp
+   */
+  private void climberControl() {
+    double  leftClimber           = controls.leftClimber();
+    double  rightClimber          = controls.rightClimber();
+    double power                  = 0.1;
+
+    if (leftClimber >= 0.5) {
+      climber.runLeftClimberForwards(power);
+    }
+    else if (leftClimber <= -0.5) {
+      climber.runLeftClimberBackwards(power);
+    }
+    else {
+      climber.stopLeftClimber();
+    }
+
+    if (rightClimber >= 0.5) {
+      climber.runRightClimberForwards(power);
+    }
+    else if (rightClimber <= -0.5) {
+      climber.runRightClimberBackwards(power);
+    }
+    else {
+      climber.stopRightClimber();
+    }
+
+    
   }
   
   /**

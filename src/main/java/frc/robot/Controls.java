@@ -339,6 +339,22 @@ public class Controls {
 		}
 	}
 
+	//Climbers
+	/*
+	 * Pressing the left joystick will move the left Climber
+	 * @return Manipulator controller Left Joystick 
+	 */
+	public double leftClimber() {
+		return -manipulatorController.getLeftY();
+	}
+	/*
+	 * Pressing the right joystick will move the right Climber
+	 * @return Manipulator controller Right Joystick 
+	 */
+	public double rightClimber() {
+		return -manipulatorController.getRightY();
+	}
+	
 	/****************************************************************************************** 
     *
     *    MISC FUNCTIONS
