@@ -16,11 +16,9 @@ public class AprilTags {
     private final double SINGLE_CONST = 17.396;       // Old: 1.09 w cm
     private final double OFFSET = 277.39;              // Old: 228 w cm
 
-    private final int RED_SPEAKER_APRILTAG_PIPELINE = 0;
-    private final int BLUE_SPEAKER_APRILTAG_PIPELINE = 1;
-    private final int ALL_APRILTAGS_PIPELINE = 2;
-    private final int COLOR_PIPELINE = 3;
-
+    private final int ALL_APRILTAGS_PIPELINE = 0;
+    private final int RED_SPEAKER_APRILTAG_PIPELINE = 1;
+    private final int BLUE_SPEAKER_APRILTAG_PIPELINE = 2;
 
     private final double ANGLE_4_1 = 325;
     private final double ANGLE_5 = 330;
@@ -177,8 +175,8 @@ public class AprilTags {
 
     /**
      * <p> Sets the limelight pipeline for the speaker
-     * <p> Pipeline 0 for Apriltag 4(Red)
-     * <p> Pipeline 1 for Apriltag 7(Blue)
+     * <p> Pipeline 1 for Apriltag 4(Red)
+     * <p> Pipeline 2 for Apriltag 7(Blue)
      */
     public void setSpeakerPipeline() {
         if(isRed){
@@ -192,8 +190,8 @@ public class AprilTags {
     /**
      * <p> Sets the limelight pipeline for the speaker
      * <p> Use this to manually set the speaker pipeline
-     * <p> Pipeline 0 for Apriltag 4(Red)
-     * <p> Pipeline 1 for Apriltag 7(Blue)
+     * <p> Pipeline 1 for Apriltag 4(Red)
+     * <p> Pipeline 2 for Apriltag 7(Blue)
      * @param isRed If we're on the red alliance
      */
     public void setSpeakerPipeline(boolean isRed) {
@@ -207,7 +205,7 @@ public class AprilTags {
 
     /**
      * <p> Sets the limelight pipeline with no filter
-     * <p> Uses pipeline 2
+     * <p> Uses pipeline 0
      */
     public void setAllPipeline() {
         LimelightHelpers.setPipelineIndex("limelight", ALL_APRILTAGS_PIPELINE);

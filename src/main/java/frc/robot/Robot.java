@@ -6,7 +6,11 @@ package frc.robot;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.controller.struct.ArmFeedforwardStruct;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.DoubleArrayEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.TimestampedDoubleArray;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -307,6 +311,9 @@ public class Robot extends TimedRobot {
     testStatus = Robot.CONT;
     on = false;
     SmartDashboard.putNumber("Shoot Angle", 327);
+
+    apriltags.setAllPipeline();
+    drive.resetYaw();
   }
   
   int testStatus = Robot.CONT;
@@ -433,7 +440,7 @@ public class Robot extends TimedRobot {
     // Get drive controller values
     //System.out.println("Forward speed: " + controls.getForwardSpeed() + " Strafe speed: " + controls.getStrafeSpeed() + " Rotate speed: " + controls.getRotateSpeed());
 
-    System.out.println("Feet: " + apriltags.getDistanceToSpeakerFeet());
+    /*System.out.println("Feet: " + apriltags.getDistanceToSpeakerFeet());
     double angle = SmartDashboard.getNumber("Shoot Angle", 327);
     boolean shoot = controls.enableShooter();
     
@@ -446,7 +453,20 @@ public class Robot extends TimedRobot {
     } else {
       shooter.spindown();
       on = false;
-    }
+    }*/
+
+    position.update();
+    Pose2d current = position.getAprilTagsPose();
+    System.out.println("Current Pose: " + current.getX() + "x, " + current.getY() + "y, " + current.getRotation().getDegrees() + "deg");
+
+    /* 
+    Pose2d points[] = {
+      new Pose2d(11.219434, 4.105148, new Rotation2d(0))
+    };
+    
+    if(testStatus != Robot.DONE) {
+      testStatus = drive.driveThroughPoints(points, current);
+    }*/
   }
 
   /** This function is called once when the robot is first started up. */

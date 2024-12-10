@@ -75,11 +75,17 @@ public class Odometry {
 
         // Get position, always use the blue position because wpilib moved to a single-origin system
         LimelightHelpers.PoseEstimate megatags2Pose = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+        
+        if(megatags2Pose == null) {
+            System.out.println("ERROR: No valid position estimate from AprilTags, MegaTags2 is NULL");
+            return;
+        }
 
         // Add AprilTag estimates
         if(drive.getYawDegreesRate() < MAX_YAW_RATE && megatags2Pose.tagCount >= REQUIRED_APRILTAGS) {
             aprilTagsEstimator.addVisionMeasurement(megatags2Pose.pose, megatags2Pose.timestampSeconds);
         }
+        
         aprilTagsEstimator.update(currentRotation, currentPosition);
     }
 
